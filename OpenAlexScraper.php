@@ -4,12 +4,38 @@
  * Reemplazo legal y estable para GoogleScholarScraper
  * License: MIT
  */
+
+// ============================================
+// CARGA DE VARIABLES DE ENTORNO
+// ============================================
+function load_env($path)
+{
+    if (!file_exists($path)) {
+        throw new Exception("El archivo .env no existe en: $path");
+    }
+    
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value, " \t\n\r\0\x0B\"'");
+            $_ENV[$key] = $value;
+            putenv("$key=$value");
+        }
+    }
+}
+
 class OpenAlexScraper
 {
     private $ch = null;
     private $api_base = 'https://api.openalex.org';
+    private $api_key = ""; // Opcional: tu API key de OpenAlex para mayor rate limit
     
-    function __construct(){
+    function __construct($api_key = null){
         $this->ch = curl_init();
         curl_setopt_array($this->ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -19,6 +45,11 @@ class OpenAlexScraper
             CURLOPT_ENCODING => 'gzip',
             CURLOPT_TIMEOUT => 30
         ]);
+
+        if (isset($_ENV["OPENALEX_API_KEY"])) {
+            print("🔑 API key de OpenAlex cargada desde .env");
+            $this->api_key = $_ENV["OPENALEX_API_KEY"];
+        }
     }
     
     function __destruct(){
@@ -35,7 +66,7 @@ class OpenAlexScraper
     function search_author($nombre, $apellido, $institucion = null)
     {
         $query = urlencode("$apellido, $nombre");
-        $url = "{$this->api_base}/authors?filter=display_name.search:$query&per_page=5";
+        $url = "{$this->api_base}/autocomplete/authors?q=$query&per_page=5&api_key={$this->api_key}";
         
         if ($institucion) {
             $url .= "&filter=institutions.display_name.search:" . urlencode($institucion);
@@ -59,11 +90,11 @@ class OpenAlexScraper
      * @param int $limite Máximo de publicaciones a recuperar
      * @return array Lista de publicaciones
      */
-    function get_author_works($openalex_id, $limite = 200)
-    {
+    function get_author_works($openalex_id, $limite = 200)    {
         $pubs = [];
         $url = "{$this->api_base}/works?filter=author.id:$openalex_id" .
-               "&sort=publication_date:desc&per_page=200";
+               "&sort=publication_date:desc&per_page=200" .
+               "&api_key={$this->api_key}";
         
         $page = 1;
         while (count($pubs) < $limite) {
@@ -109,8 +140,7 @@ class OpenAlexScraper
      * @param string $orcid ORCID iD (ej: 0000-0002-1825-0097)
      * @return array|null Datos del autor
      */
-    function get_author_by_orcid($orcid)
-    {
+    function get_author_by_orcid($orcid)    {
         $url = "{$this->api_base}/authors?filter=orcid:$orcid&per_page=1";
         curl_setopt($this->ch, CURLOPT_URL, $url);
         $response = curl_exec($this->ch);
@@ -131,10 +161,10 @@ function test_scraper()
 {
     // Mapeo de investigadores con ORCID o nombre para buscar
     $investigadores = [
-        'Budan' => ['nombre' => 'Fernando', 'apellido' => 'Budan', 'orcid' => null],
-        'Carballido' => ['nombre' => 'Juan', 'apellido' => 'Carballido', 'orcid' => null],
-        'Chesñevar' => ['nombre' => 'Carlos', 'apellido' => 'Chesñevar', 'orcid' => '0000-0002-6795-6069'],
-        'Simari' => ['nombre' => 'Guillermo', 'apellido' => 'Simari', 'orcid' => '0000-0002-3652-2849'],
+        'Budan' => ['nombre' => 'Maximiliano', 'apellido' => 'Budan', 'orcid' => null],
+        'Carballido' => ['nombre' => 'Jessica', 'apellido' => 'Carballido', 'orcid' => null],
+        'Chesñevar' => ['nombre' => 'Carlos', 'apellido' => 'Chesñevar', 'orcid' => '0000-0002-1747-5905'],
+        'Simari' => ['nombre' => 'Guillermo', 'apellido' => 'Simari', 'orcid' => '0000-0001-6247-0428'],
     ];
     
     $scraper = new OpenAlexScraper;
@@ -173,5 +203,7 @@ function test_scraper()
 
 // ✅ Solo ejecutar test si se llama directamente al archivo
 if (php_sapi_name() === 'cli' && realpath($argv[0] ?? '') == __FILE__) {
+    // Cargar .env al inicio
+    load_env(__DIR__ . '/.env');
     test_scraper();
 }
