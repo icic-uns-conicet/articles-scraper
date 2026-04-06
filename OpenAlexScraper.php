@@ -1,17 +1,17 @@
 <?php
 /**
  * OpenAlex Author Publications Scraper
- * Reemplazo legal y estable para GoogleScholarScraper
+ * Legal and stable replacement for GoogleScholarScraper
  * License: MIT
  */
 
 // ============================================
-// CARGA DE VARIABLES DE ENTORNO
+// LOADING ENVIRONMENT VARIABLES
 // ============================================
 function load_env($path)
 {
     if (!file_exists($path)) {
-        throw new Exception("El archivo .env no existe en: $path");
+        throw new Exception("The .env file does not exist at: $path");
     }
     
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -33,21 +33,22 @@ class OpenAlexScraper
 {
     private $ch = null;
     private $api_base = 'https://api.openalex.org';
-    private $api_key = ""; // Opcional: tu API key de OpenAlex para mayor rate limit
+    private $api_key = ""; // Optional: your OpenAlex API key for higher rate limits
     
     function __construct($api_key = null){
         $this->ch = curl_init();
         curl_setopt_array($this->ch, [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => true,  // ✅ SSL habilitado
+            CURLOPT_SSL_VERIFYPEER => true,  // ✅ SSL enabled
             CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_USERAGENT => 'TuProyecto/1.0 (tu@email.com)', // Requerido por OpenAlex
+            CURLOPT_USERAGENT => $_ENV["USER_AGENT"] ?? 'YourProject/1.0 (your@email.com)', // Required by OpenAlex
             CURLOPT_ENCODING => 'gzip',
+            // CURLOPT_VERBOSE => true,
             CURLOPT_TIMEOUT => 30
         ]);
 
         if (isset($_ENV["OPENALEX_API_KEY"])) {
-            print("🔑 API key de OpenAlex cargada desde .env");
+            print("🔑 OpenAlex API key loaded from .env");
             $this->api_key = $_ENV["OPENALEX_API_KEY"];
         }
     }
@@ -57,27 +58,25 @@ class OpenAlexScraper
     }
     
     /**
-     * Buscar autor por nombre y obtener su OpenAlex ID
-     * @param string $nombre Nombre del autor
-     * @param string $apellido Apellido del autor
-     * @param string $institucion Opcional: filtrar por institución
-     * @return array|null Datos del autor o null si no encontrado
+     * Search for an author by name and get their OpenAlex ID
+     * @param string $firstName Author's first name
+     * @param string $lastName Author's last name
+     * @param string $institution Optional: filter by institution
+     * @return array|null Author data or null if not found
      */
-    function search_author($nombre, $apellido, $institucion = null)
+    function search_author($firstName, $lastName)
     {
-        $query = urlencode("$apellido, $nombre");
-        $url = "{$this->api_base}/autocomplete/authors?q=$query&per_page=5&api_key={$this->api_key}";
-        
-        if ($institucion) {
-            $url .= "&filter=institutions.display_name.search:" . urlencode($institucion);
-        }
-        
+        $query = urlencode("$firstName, $lastName");
+        $url = "{$this->api_base}/autocomplete/authors?q=$query&api_key={$this->api_key}";
+                
         curl_setopt($this->ch, CURLOPT_URL, $url);
+        // print($url . "\n");
         $response = curl_exec($this->ch);
+        // print($response . "\n");
         $data = json_decode($response, true);
-        
+        // print_r($data);
         if (isset($data['results']) && count($data['results']) > 0) {
-            // Retornar el primer resultado (más relevante)
+            // Return the first result (most relevant)
             return $data['results'][0];
         }
         
@@ -85,19 +84,19 @@ class OpenAlexScraper
     }
     
     /**
-     * Obtener todas las publicaciones de un autor por su OpenAlex ID
-     * @param string $openalex_id OpenAlex Author ID (ej: A5023889049)
-     * @param int $limite Máximo de publicaciones a recuperar
-     * @return array Lista de publicaciones
+     * Get all publications of an author by their OpenAlex ID
+     * @param string $openalex_id OpenAlex Author ID (e.g., A5023889049)
+     * @param int $limit Maximum number of publications to retrieve
+     * @return array List of publications
      */
-    function get_author_works($openalex_id, $limite = 200)    {
+    function get_author_works($openalex_id, $limit = 200)    {
         $pubs = [];
         $url = "{$this->api_base}/works?filter=author.id:$openalex_id" .
                "&sort=publication_date:desc&per_page=200" .
                "&api_key={$this->api_key}";
         
         $page = 1;
-        while (count($pubs) < $limite) {
+        while (count($pubs) < $limit) {
             curl_setopt($this->ch, CURLOPT_URL, $url . "&page=$page");
             $response = curl_exec($this->ch);
             $data = json_decode($response, true);
@@ -121,24 +120,24 @@ class OpenAlexScraper
                     'url' => $work['open_access']['oa_url'] ?? ($work['doi'] ? "https://doi.org/{$work['doi']}" : null)
                 ];
                 
-                if (count($pubs) >= $limite) break;
+                if (count($pubs) >= $limit) break;
             }
             
-            // Verificar si hay más páginas
+            // Check if there are more pages
             if (count($data['results']) < 200) break;
             $page++;
             
-            // Respetar rate limiting de OpenAlex (100 req/min sin API key)
-            usleep(600000); // 0.6 segundos entre peticiones
+            // Respect OpenAlex rate limiting (100 req/min without API key)
+            usleep(600000); // 0.6 seconds between requests
         }
         
         return $pubs;
     }
     
     /**
-     * Buscar autor por ORCID (más preciso que por nombre)
-     * @param string $orcid ORCID iD (ej: 0000-0002-1825-0097)
-     * @return array|null Datos del autor
+     * Search for an author by ORCID (more precise than by name)
+     * @param string $orcid ORCID iD (e.g., 0000-0002-1825-0097)
+     * @return array|null Author data
      */
     function get_author_by_orcid($orcid)    {
         $url = "{$this->api_base}/authors?filter=orcid:$orcid&per_page=1";
@@ -155,55 +154,55 @@ class OpenAlexScraper
 }
 
 // ============================================
-// FUNCIONES DE TEST (solo si se ejecuta directamente)
+// TEST FUNCTIONS (only if executed directly)
 // ============================================
 function test_scraper()
 {
-    // Mapeo de investigadores con ORCID o nombre para buscar
-    $investigadores = [
-        'Budan' => ['nombre' => 'Maximiliano', 'apellido' => 'Budan', 'orcid' => null],
-        'Carballido' => ['nombre' => 'Jessica', 'apellido' => 'Carballido', 'orcid' => null],
-        'Chesñevar' => ['nombre' => 'Carlos', 'apellido' => 'Chesñevar', 'orcid' => '0000-0002-1747-5905'],
-        'Simari' => ['nombre' => 'Guillermo', 'apellido' => 'Simari', 'orcid' => '0000-0001-6247-0428'],
+    // Mapping of researchers with ORCID or name to search
+    $researchers = [
+        'Budan' => ['firstName' => 'Maximiliano', 'lastName' => 'Budan', 'orcid' => null],
+        'Carballido' => ['firstName' => 'Jessica', 'lastName' => 'Carballido', 'orcid' => null],
+        'Chesñevar' => ['firstName' => 'Carlos', 'lastName' => 'Chesñevar', 'orcid' => '0000-0002-1747-5905'],
+        'Simari' => ['firstName' => 'Guillermo', 'lastName' => 'Simari', 'orcid' => '0000-0001-6247-0428'],
     ];
     
     $scraper = new OpenAlexScraper;
     
-    foreach ($investigadores as $apellido => $datos) {
-        echo "\n=== Buscando: $apellido ===\n";
+    foreach ($researchers as $lastName => $data) {
+        echo "\n=== Searching: $lastName ===\n";
         
-        // Intentar primero por ORCID (más preciso)
-        if ($datos['orcid']) {
-            echo "Buscando por ORCID: {$datos['orcid']}\n";
-            $author = $scraper->get_author_by_orcid($datos['orcid']);
+        // Try first by ORCID (more precise)
+        if ($data['orcid']) {
+            echo "Searching by ORCID: {$data['orcid']}\n";
+            $author = $scraper->get_author_by_orcid($data['orcid']);
         } else {
-            echo "Buscando por nombre: {$datos['nombre']} {$datos['apellido']}\n";
-            $author = $scraper->search_author($datos['nombre'], $datos['apellido']);
+            echo "Searching by name: {$data['firstName']} {$data['lastName']}\n";
+            $author = $scraper->search_author($data['firstName'], $data['lastName']);
         }
         
         if ($author) {
-            echo "✅ Autor encontrado: {$author['display_name']}\n";
+            echo "✅ Author found: {$author['display_name']}\n";
             echo "   OpenAlex ID: {$author['id']}\n";
-            echo "   Trabajos totales: {$author['works_count']}\n";
-            echo "   Citaciones: {$author['cited_by_count']}\n";
+            echo "   Total works: {$author['works_count']}\n";
+            echo "   Citations: {$author['cited_by_count']}\n";
             
-            // Obtener últimas 10 publicaciones
+            // Get the last 10 publications
             $works = $scraper->get_author_works($author['id'], 10);
-            echo "   Últimas publicaciones:\n";
+            echo "   Latest publications:\n";
             foreach (array_slice($works, 0, 5) as $w) {
                 echo "   - ({$w['year']}) {$w['title']}\n";
             }
         } else {
-            echo "❌ Autor no encontrado\n";
+            echo "❌ Author not found\n";
         }
         
-        sleep(2); // Pausa entre investigadores
+        sleep(2); // Pause between researchers
     }
 }
 
-// ✅ Solo ejecutar test si se llama directamente al archivo
+// ✅ Only execute test if called directly
 if (php_sapi_name() === 'cli' && realpath($argv[0] ?? '') == __FILE__) {
-    // Cargar .env al inicio
+    // Load .env at the start
     load_env(__DIR__ . '/.env');
     test_scraper();
 }
