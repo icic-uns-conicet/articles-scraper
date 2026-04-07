@@ -105,12 +105,23 @@ class OpenAlexScraper
                 break;
             }
             
+            // print_r($data['results']); die();
+
             foreach ($data['results'] as $work) {
                 $pubs[] = [
                     'id' => $work['id'] ?? null,
                     'doi' => $work['doi'] ?? null,
                     'title' => $work['title'] ?? null,
                     'year' => $work['publication_year'] ?? null,
+                    /*publication_date
+                    
+                    primary_location->source->display_name
+                    primary_location->source->issn_l
+                    biblio->volume
+                    biblio->issue
+                    biblio->first_page
+                    biblio->last_page
+                    */
                     'venue' => $work['primary_location']['source']['display_name'] ?? null,
                     'authors' => array_map(function($a) {
                         return $a['author']['display_name'] ?? null;
@@ -165,6 +176,7 @@ function test_scraper()
         'Chesñevar' => ['firstName' => 'Carlos', 'lastName' => 'Chesñevar', 'orcid' => '0000-0002-1747-5905'],
         'Simari' => ['firstName' => 'Guillermo', 'lastName' => 'Simari', 'orcid' => '0000-0001-6247-0428'],
     ];
+    $researchers = ['Cecchini' => ['firstName' => 'Cecchini Rocío', 'lastName' => '', 'orcid' => null]];
     
     $scraper = new OpenAlexScraper;
     

@@ -1,0 +1,830 @@
+🔑 OpenAlex API key loaded from .env
+=== Searching: Budan ===
+Searching by name: Maximiliano Budan
+❌ Author not found
+
+=== Searching: Carballido ===
+Searching by name: Jessica Carballido
+✅ Author found: Jessica Andrea Carballido
+   OpenAlex ID: https://openalex.org/A5063101145
+   Total works: 54
+   Citations: 518
+Array
+(
+    [0] => Array
+        (
+            [id] => https://openalex.org/W4412821350
+            [doi] => https://doi.org/10.1007/s42979-025-04251-3
+            [title] => Massive Production of Cancer Synthetic RNA-Seq Gene Expression Samples
+            [display_name] => Massive Production of Cancer Synthetic RNA-Seq Gene Expression Samples
+            [publication_year] => 2025
+            [publication_date] => 2025-08-01
+            [ids] => Array
+                (
+                    [openalex] => https://openalex.org/W4412821350
+                    [doi] => https://doi.org/10.1007/s42979-025-04251-3
+                )
+
+            [language] => en
+            [primary_location] => Array
+                (
+                    [id] => doi:10.1007/s42979-025-04251-3
+                    [is_oa] => 
+                    [landing_page_url] => https://doi.org/10.1007/s42979-025-04251-3
+                    [pdf_url] => 
+                    [source] => Array
+                        (
+                            [id] => https://openalex.org/S4210174798
+                            [display_name] => SN Computer Science
+                            [issn_l] => 2661-8907
+                            [issn] => Array
+                                (
+                                    [0] => 2661-8907
+                                    [1] => 2662-995X
+                                )
+
+                            [is_oa] => 
+                            [is_in_doaj] => 
+                            [is_core] => 1
+                            [host_organization] => https://openalex.org/P4310319965
+                            [host_organization_name] => Springer Nature
+                            [host_organization_lineage] => Array
+                                (
+                                    [0] => https://openalex.org/P4310319965
+                                )
+
+                            [host_organization_lineage_names] => Array
+                                (
+                                    [0] => Springer Nature
+                                )
+
+                            [type] => journal
+                        )
+
+                    [license] => 
+                    [license_id] => 
+                    [version] => publishedVersion
+                    [is_accepted] => 1
+                    [is_published] => 1
+                    [raw_source_name] => SN Computer Science
+                    [raw_type] => journal-article
+                )
+
+            [type] => article
+            [indexed_in] => Array
+                (
+                    [0] => crossref
+                )
+
+            [open_access] => Array
+                (
+                    [is_oa] => 
+                    [oa_status] => closed
+                    [oa_url] => 
+                    [any_repository_has_fulltext] => 
+                )
+
+            [authorships] => Array
+                (
+                    [0] => Array
+                        (
+                            [author_position] => first
+                            [author] => Array
+                                (
+                                    [id] => https://openalex.org/A5064933669
+                                    [display_name] => Matías Gabriel Rojas
+                                    [orcid] => https://orcid.org/0000-0003-3881-0888
+                                )
+
+                            [institutions] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [id] => https://openalex.org/I4210088229
+                                            [display_name] => Instituto Interdisciplinario de Ciencias Básicas
+                                            [ror] => https://ror.org/00568z619
+                                            [country_code] => AR
+                                            [type] => facility
+                                            [lineage] => Array
+                                                (
+                                                    [0] => https://openalex.org/I151201029
+                                                    [1] => https://openalex.org/I15881080
+                                                    [2] => https://openalex.org/I4210088229
+                                                    [3] => https://openalex.org/I4210123736
+                                                    [4] => https://openalex.org/I4387155568
+                                                )
+
+                                        )
+
+                                )
+
+                            [countries] => Array
+                                (
+                                    [0] => AR
+                                )
+
+                            [is_corresponding] => 1
+                            [raw_author_name] => Matías Gabriel Rojas
+                            [raw_affiliation_strings] => Array
+                                (
+                                    [0] => Instituto Interdisciplinario de Ciencias Básicas (ICB), Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional de Cuyo, Padre Jorge Contreras 1300, M5502JMA, Mendoza, Mendoza, Argentina
+                                )
+
+                            [affiliations] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [raw_affiliation_string] => Instituto Interdisciplinario de Ciencias Básicas (ICB), Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional de Cuyo, Padre Jorge Contreras 1300, M5502JMA, Mendoza, Mendoza, Argentina
+                                            [institution_ids] => Array
+                                                (
+                                                    [0] => https://openalex.org/I4210088229
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [author_position] => middle
+                            [author] => Array
+                                (
+                                    [id] => https://openalex.org/A5065962628
+                                    [display_name] => Ana Carolina Olivera
+                                    [orcid] => https://orcid.org/0000-0001-7825-1959
+                                )
+
+                            [institutions] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [id] => https://openalex.org/I4210088229
+                                            [display_name] => Instituto Interdisciplinario de Ciencias Básicas
+                                            [ror] => https://ror.org/00568z619
+                                            [country_code] => AR
+                                            [type] => facility
+                                            [lineage] => Array
+                                                (
+                                                    [0] => https://openalex.org/I151201029
+                                                    [1] => https://openalex.org/I15881080
+                                                    [2] => https://openalex.org/I4210088229
+                                                    [3] => https://openalex.org/I4210123736
+                                                    [4] => https://openalex.org/I4387155568
+                                                )
+
+                                        )
+
+                                    [1] => Array
+                                        (
+                                            [id] => https://openalex.org/I15881080
+                                            [display_name] => Universidad Nacional de Cuyo
+                                            [ror] => https://ror.org/05sn8wf81
+                                            [country_code] => AR
+                                            [type] => education
+                                            [lineage] => Array
+                                                (
+                                                    [0] => https://openalex.org/I15881080
+                                                )
+
+                                        )
+
+                                )
+
+                            [countries] => Array
+                                (
+                                    [0] => AR
+                                )
+
+                            [is_corresponding] => 
+                            [raw_author_name] => Ana Carolina Olivera
+                            [raw_affiliation_strings] => Array
+                                (
+                                    [0] => Facultad de Ingeniería, Universidad Nacional de Cuyo, Centro Universitario, M5502JMA, Mendoza, Mendoza, Argentina
+                                    [1] => Instituto Interdisciplinario de Ciencias Básicas (ICB), Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional de Cuyo, Padre Jorge Contreras 1300, M5502JMA, Mendoza, Mendoza, Argentina
+                                )
+
+                            [affiliations] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [raw_affiliation_string] => Facultad de Ingeniería, Universidad Nacional de Cuyo, Centro Universitario, M5502JMA, Mendoza, Mendoza, Argentina
+                                            [institution_ids] => Array
+                                                (
+                                                    [0] => https://openalex.org/I15881080
+                                                )
+
+                                        )
+
+                                    [1] => Array
+                                        (
+                                            [raw_affiliation_string] => Instituto Interdisciplinario de Ciencias Básicas (ICB), Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional de Cuyo, Padre Jorge Contreras 1300, M5502JMA, Mendoza, Mendoza, Argentina
+                                            [institution_ids] => Array
+                                                (
+                                                    [0] => https://openalex.org/I4210088229
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [author_position] => middle
+                            [author] => Array
+                                (
+                                    [id] => https://openalex.org/A5085782739
+                                    [display_name] => Pablo Javier Vidal
+                                    [orcid] => https://orcid.org/0000-0001-6502-8010
+                                )
+
+                            [institutions] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [id] => https://openalex.org/I15881080
+                                            [display_name] => Universidad Nacional de Cuyo
+                                            [ror] => https://ror.org/05sn8wf81
+                                            [country_code] => AR
+                                            [type] => education
+                                            [lineage] => Array
+                                                (
+                                                    [0] => https://openalex.org/I15881080
+                                                )
+
+                                        )
+
+                                    [1] => Array
+                                        (
+                                            [id] => https://openalex.org/I4210088229
+                                            [display_name] => Instituto Interdisciplinario de Ciencias Básicas
+                                            [ror] => https://ror.org/00568z619
+                                            [country_code] => AR
+                                            [type] => facility
+                                            [lineage] => Array
+                                                (
+                                                    [0] => https://openalex.org/I151201029
+                                                    [1] => https://openalex.org/I15881080
+                                                    [2] => https://openalex.org/I4210088229
+                                                    [3] => https://openalex.org/I4210123736
+                                                    [4] => https://openalex.org/I4387155568
+                                                )
+
+                                        )
+
+                                )
+
+                            [countries] => Array
+                                (
+                                    [0] => AR
+                                )
+
+                            [is_corresponding] => 
+                            [raw_author_name] => Pablo Javier Vidal
+                            [raw_affiliation_strings] => Array
+                                (
+                                    [0] => Facultad de Ingeniería, Universidad Nacional de Cuyo, Centro Universitario, M5502JMA, Mendoza, Mendoza, Argentina
+                                    [1] => Instituto Interdisciplinario de Ciencias Básicas (ICB), Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional de Cuyo, Padre Jorge Contreras 1300, M5502JMA, Mendoza, Mendoza, Argentina
+                                )
+
+                            [affiliations] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [raw_affiliation_string] => Facultad de Ingeniería, Universidad Nacional de Cuyo, Centro Universitario, M5502JMA, Mendoza, Mendoza, Argentina
+                                            [institution_ids] => Array
+                                                (
+                                                    [0] => https://openalex.org/I15881080
+                                                )
+
+                                        )
+
+                                    [1] => Array
+                                        (
+                                            [raw_affiliation_string] => Instituto Interdisciplinario de Ciencias Básicas (ICB), Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional de Cuyo, Padre Jorge Contreras 1300, M5502JMA, Mendoza, Mendoza, Argentina
+                                            [institution_ids] => Array
+                                                (
+                                                    [0] => https://openalex.org/I4210088229
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [3] => Array
+                        (
+                            [author_position] => last
+                            [author] => Array
+                                (
+                                    [id] => https://openalex.org/A5063101145
+                                    [display_name] => Jessica Andrea Carballido
+                                    [orcid] => https://orcid.org/0000-0001-6284-1049
+                                )
+
+                            [institutions] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [id] => https://openalex.org/I56858762
+                                            [display_name] => Universidad Nacional del Sur
+                                            [ror] => https://ror.org/028crwz56
+                                            [country_code] => AR
+                                            [type] => education
+                                            [lineage] => Array
+                                                (
+                                                    [0] => https://openalex.org/I56858762
+                                                )
+
+                                        )
+
+                                )
+
+                            [countries] => Array
+                                (
+                                    [0] => AR
+                                )
+
+                            [is_corresponding] => 
+                            [raw_author_name] => Jessica Andrea Carballido
+                            [raw_affiliation_strings] => Array
+                                (
+                                    [0] => Instituto de Ciencias e Ingeniería de la Computación, Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional del Sur, San Andres 800, 8000, Bahía Blanca, Buenos Aires, Argentina
+                                )
+
+                            [affiliations] => Array
+                                (
+                                    [0] => Array
+                                        (
+                                            [raw_affiliation_string] => Instituto de Ciencias e Ingeniería de la Computación, Consejo Nacional de Investigaciones Científicas y Técnicas (CONICET), Universidad Nacional del Sur, San Andres 800, 8000, Bahía Blanca, Buenos Aires, Argentina
+                                            [institution_ids] => Array
+                                                (
+                                                    [0] => https://openalex.org/I56858762
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                )
+
+            [institutions] => Array
+                (
+                )
+
+            [countries_distinct_count] => 1
+            [institutions_distinct_count] => 4
+            [corresponding_author_ids] => Array
+                (
+                    [0] => https://openalex.org/A5064933669
+                )
+
+            [corresponding_institution_ids] => Array
+                (
+                    [0] => https://openalex.org/I4210088229
+                )
+
+            [apc_list] => Array
+                (
+                    [value] => 2290
+                    [currency] => EUR
+                    [value_usd] => 2890
+                )
+
+            [apc_paid] => 
+            [fwci] => 0
+            [has_fulltext] => 
+            [cited_by_count] => 0
+            [citation_normalized_percentile] => Array
+                (
+                    [value] => 0.17587914
+                    [is_in_top_1_percent] => 
+                    [is_in_top_10_percent] => 
+                )
+
+            [cited_by_percentile_year] => 
+            [biblio] => Array
+                (
+                    [volume] => 6
+                    [issue] => 6
+                    [first_page] => 
+                    [last_page] => 
+                )
+
+            [is_retracted] => 
+            [is_paratext] => 
+            [is_xpac] => 
+            [primary_topic] => Array
+                (
+                    [id] => https://openalex.org/T11970
+                    [display_name] => Molecular Biology Techniques and Applications
+                    [score] => 0.99730002880096
+                    [subfield] => Array
+                        (
+                            [id] => https://openalex.org/subfields/1312
+                            [display_name] => Molecular Biology
+                        )
+
+                    [field] => Array
+                        (
+                            [id] => https://openalex.org/fields/13
+                            [display_name] => Biochemistry, Genetics and Molecular Biology
+                        )
+
+                    [domain] => Array
+                        (
+                            [id] => https://openalex.org/domains/1
+                            [display_name] => Life Sciences
+                        )
+
+                )
+
+            [topics] => Array
+                (
+                    [0] => Array
+                        (
+                            [id] => https://openalex.org/T11970
+                            [display_name] => Molecular Biology Techniques and Applications
+                            [score] => 0.99730002880096
+                            [subfield] => Array
+                                (
+                                    [id] => https://openalex.org/subfields/1312
+                                    [display_name] => Molecular Biology
+                                )
+
+                            [field] => Array
+                                (
+                                    [id] => https://openalex.org/fields/13
+                                    [display_name] => Biochemistry, Genetics and Molecular Biology
+                                )
+
+                            [domain] => Array
+                                (
+                                    [id] => https://openalex.org/domains/1
+                                    [display_name] => Life Sciences
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [id] => https://openalex.org/T11482
+                            [display_name] => RNA modifications and cancer
+                            [score] => 0.99680000543594
+                            [subfield] => Array
+                                (
+                                    [id] => https://openalex.org/subfields/1312
+                                    [display_name] => Molecular Biology
+                                )
+
+                            [field] => Array
+                                (
+                                    [id] => https://openalex.org/fields/13
+                                    [display_name] => Biochemistry, Genetics and Molecular Biology
+                                )
+
+                            [domain] => Array
+                                (
+                                    [id] => https://openalex.org/domains/1
+                                    [display_name] => Life Sciences
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [id] => https://openalex.org/T11287
+                            [display_name] => Cancer Genomics and Diagnostics
+                            [score] => 0.99299997091293
+                            [subfield] => Array
+                                (
+                                    [id] => https://openalex.org/subfields/1306
+                                    [display_name] => Cancer Research
+                                )
+
+                            [field] => Array
+                                (
+                                    [id] => https://openalex.org/fields/13
+                                    [display_name] => Biochemistry, Genetics and Molecular Biology
+                                )
+
+                            [domain] => Array
+                                (
+                                    [id] => https://openalex.org/domains/1
+                                    [display_name] => Life Sciences
+                                )
+
+                        )
+
+                )
+
+            [keywords] => Array
+                (
+                    [0] => Array
+                        (
+                            [id] => https://openalex.org/keywords/rna-seq
+                            [display_name] => RNA-Seq
+                            [score] => 0.67693573236465
+                        )
+
+                    [1] => Array
+                        (
+                            [id] => https://openalex.org/keywords/gene-expression
+                            [display_name] => Gene expression
+                            [score] => 0.60474979877472
+                        )
+
+                    [2] => Array
+                        (
+                            [id] => https://openalex.org/keywords/cancer
+                            [display_name] => Cancer
+                            [score] => 0.56035107374191
+                        )
+
+                    [3] => Array
+                        (
+                            [id] => https://openalex.org/keywords/gene
+                            [display_name] => Gene
+                            [score] => 0.54291343688965
+                        )
+
+                    [4] => Array
+                        (
+                            [id] => https://openalex.org/keywords/rna
+                            [display_name] => RNA
+                            [score] => 0.48152074217796
+                        )
+
+                    [5] => Array
+                        (
+                            [id] => https://openalex.org/keywords/computational-biology
+                            [display_name] => Computational biology
+                            [score] => 0.47560554742813
+                        )
+
+                    [6] => Array
+                        (
+                            [id] => https://openalex.org/keywords/biology
+                            [display_name] => Biology
+                            [score] => 0.45646160840988
+                        )
+
+                    [7] => Array
+                        (
+                            [id] => https://openalex.org/keywords/genetics
+                            [display_name] => Genetics
+                            [score] => 0.36722928285599
+                        )
+
+                    [8] => Array
+                        (
+                            [id] => https://openalex.org/keywords/cancer-research
+                            [display_name] => Cancer research
+                            [score] => 0.34898847341537
+                        )
+
+                    [9] => Array
+                        (
+                            [id] => https://openalex.org/keywords/transcriptome
+                            [display_name] => Transcriptome
+                            [score] => 0.26753693819046
+                        )
+
+                )
+
+            [concepts] => Array
+                (
+                    [0] => Array
+                        (
+                            [id] => https://openalex.org/C107397762
+                            [wikidata] => https://www.wikidata.org/wiki/Q2542347
+                            [display_name] => RNA-Seq
+                            [level] => 5
+                            [score] => 0.67693573236465
+                        )
+
+                    [1] => Array
+                        (
+                            [id] => https://openalex.org/C150194340
+                            [wikidata] => https://www.wikidata.org/wiki/Q26972
+                            [display_name] => Gene expression
+                            [level] => 3
+                            [score] => 0.60474979877472
+                        )
+
+                    [2] => Array
+                        (
+                            [id] => https://openalex.org/C121608353
+                            [wikidata] => https://www.wikidata.org/wiki/Q12078
+                            [display_name] => Cancer
+                            [level] => 2
+                            [score] => 0.56035107374191
+                        )
+
+                    [3] => Array
+                        (
+                            [id] => https://openalex.org/C104317684
+                            [wikidata] => https://www.wikidata.org/wiki/Q7187
+                            [display_name] => Gene
+                            [level] => 2
+                            [score] => 0.54291343688965
+                        )
+
+                    [4] => Array
+                        (
+                            [id] => https://openalex.org/C67705224
+                            [wikidata] => https://www.wikidata.org/wiki/Q11053
+                            [display_name] => RNA
+                            [level] => 3
+                            [score] => 0.48152074217796
+                        )
+
+                    [5] => Array
+                        (
+                            [id] => https://openalex.org/C70721500
+                            [wikidata] => https://www.wikidata.org/wiki/Q177005
+                            [display_name] => Computational biology
+                            [level] => 1
+                            [score] => 0.47560554742813
+                        )
+
+                    [6] => Array
+                        (
+                            [id] => https://openalex.org/C86803240
+                            [wikidata] => https://www.wikidata.org/wiki/Q420
+                            [display_name] => Biology
+                            [level] => 0
+                            [score] => 0.45646160840988
+                        )
+
+                    [7] => Array
+                        (
+                            [id] => https://openalex.org/C54355233
+                            [wikidata] => https://www.wikidata.org/wiki/Q7162
+                            [display_name] => Genetics
+                            [level] => 1
+                            [score] => 0.36722928285599
+                        )
+
+                    [8] => Array
+                        (
+                            [id] => https://openalex.org/C502942594
+                            [wikidata] => https://www.wikidata.org/wiki/Q3421914
+                            [display_name] => Cancer research
+                            [level] => 1
+                            [score] => 0.34898847341537
+                        )
+
+                    [9] => Array
+                        (
+                            [id] => https://openalex.org/C162317418
+                            [wikidata] => https://www.wikidata.org/wiki/Q252857
+                            [display_name] => Transcriptome
+                            [level] => 4
+                            [score] => 0.26753693819046
+                        )
+
+                )
+
+            [mesh] => Array
+                (
+                )
+
+            [locations_count] => 1
+            [locations] => Array
+                (
+                    [0] => Array
+                        (
+                            [id] => doi:10.1007/s42979-025-04251-3
+                            [is_oa] => 
+                            [landing_page_url] => https://doi.org/10.1007/s42979-025-04251-3
+                            [pdf_url] => 
+                            [source] => Array
+                                (
+                                    [id] => https://openalex.org/S4210174798
+                                    [display_name] => SN Computer Science
+                                    [issn_l] => 2661-8907
+                                    [issn] => Array
+                                        (
+                                            [0] => 2661-8907
+                                            [1] => 2662-995X
+                                        )
+
+                                    [is_oa] => 
+                                    [is_in_doaj] => 
+                                    [is_core] => 1
+                                    [host_organization] => https://openalex.org/P4310319965
+                                    [host_organization_name] => Springer Nature
+                                    [host_organization_lineage] => Array
+                                        (
+                                            [0] => https://openalex.org/P4310319965
+                                        )
+
+                                    [host_organization_lineage_names] => Array
+                                        (
+                                            [0] => Springer Nature
+                                        )
+
+                                    [type] => journal
+                                )
+
+                            [license] => 
+                            [license_id] => 
+                            [version] => publishedVersion
+                            [is_accepted] => 1
+                            [is_published] => 1
+                            [raw_source_name] => SN Computer Science
+                            [raw_type] => journal-article
+                        )
+
+                )
+
+            [best_oa_location] => 
+            [sustainable_development_goals] => Array
+                (
+                    [0] => Array
+                        (
+                            [display_name] => Zero hunger
+                            [id] => https://metadata.un.org/sdg/2
+                            [score] => 0.61000001430511
+                        )
+
+                )
+
+            [awards] => Array
+                (
+                )
+
+            [funders] => Array
+                (
+                )
+
+            [has_content] => Array
+                (
+                    [pdf] => 
+                    [grobid_xml] => 
+                )
+
+            [content_urls] => 
+            [referenced_works_count] => 28
+            [referenced_works] => Array
+                (
+                    [0] => https://openalex.org/W124191956
+                    [1] => https://openalex.org/W2114104545
+                    [2] => https://openalex.org/W2549966893
+                    [3] => https://openalex.org/W2794749944
+                    [4] => https://openalex.org/W2892055372
+                    [5] => https://openalex.org/W2964121744
+                    [6] => https://openalex.org/W3000350302
+                    [7] => https://openalex.org/W3012413426
+                    [8] => https://openalex.org/W3013462789
+                    [9] => https://openalex.org/W3024756171
+                    [10] => https://openalex.org/W3028304854
+                    [11] => https://openalex.org/W3080144556
+                    [12] => https://openalex.org/W3092803354
+                    [13] => https://openalex.org/W3122075993
+                    [14] => https://openalex.org/W4206662285
+                    [15] => https://openalex.org/W4210598545
+                    [16] => https://openalex.org/W4224587822
+                    [17] => https://openalex.org/W4294216483
+                    [18] => https://openalex.org/W4294643831
+                    [19] => https://openalex.org/W4295521014
+                    [20] => https://openalex.org/W4298289240
+                    [21] => https://openalex.org/W4301206121
+                    [22] => https://openalex.org/W4302343661
+                    [23] => https://openalex.org/W4312094047
+                    [24] => https://openalex.org/W4321021082
+                    [25] => https://openalex.org/W4366278929
+                    [26] => https://openalex.org/W4389454427
+                    [27] => https://openalex.org/W4403740998
+                )
+
+            [related_works] => Array
+                (
+                    [0] => https://openalex.org/W4394426846
+                    [1] => https://openalex.org/W4200033037
+                    [2] => https://openalex.org/W4394543623
+                    [3] => https://openalex.org/W4410026407
+                    [4] => https://openalex.org/W3213655218
+                    [5] => https://openalex.org/W4394560977
+                    [6] => https://openalex.org/W2147993839
+                    [7] => https://openalex.org/W4394488504
+                    [8] => https://openalex.org/W4394163355
+                    [9] => https://openalex.org/W1840103016
+                )
+
+            [abstract_inverted_index] => 
+            [counts_by_year] => Array
+                (
+                )
+
+            [updated_date] => 2025-11-06T03:46:38.306776
+            [created_date] => 2025-10-10T00:00:00
+        )    
+)
