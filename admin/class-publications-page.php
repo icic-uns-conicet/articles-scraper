@@ -220,7 +220,9 @@ class OpenAlex_Publications_Page {
             $pub_id = (int) $pub->pub_id;
             OpenAlex_Helpers::set_publication_hidden( $pub_id, in_array( $pub_id, $selected, true ) );
         }
-
+		
+		OpenAlex_Helpers::clear_member_publications_cache( $post_id );
+		
         wp_redirect( admin_url( 'admin.php?page=openalex-publications&post_id=' . $post_id . '&updated=1' ) );
         exit;
     }

@@ -89,6 +89,17 @@ class OpenAlex_TeachPress_Import {
         $year       = intval( $work['publication_year'] ?? 0 );
         $biblio     = $work['biblio'] ?? [];
         $source     = $work['primary_location']['source'] ?? [];
+		
+		$primary_location = $work['primary_location'] ?? [];
+		
+		$source = $primary_location['source'] ?? [];
+
+		if ( ! is_array( $source ) ) {
+    		$source = [];
+		}
+		
+		$source['display_name'] = $source['display_name'] ?? ( $primary_location['raw_source_name'] ?? '' );
+		
         $pages_str  = ( ! empty( $biblio['first_page'] ) && ! empty( $biblio['last_page'] ) )
                       ? $biblio['first_page'] . '--' . $biblio['last_page']
                       : ( $biblio['first_page'] ?? '' );

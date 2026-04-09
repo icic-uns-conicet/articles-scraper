@@ -30,6 +30,7 @@ class OpenAlex_Admin_Sync {
         }
 
         $result = OpenAlex_TeachPress_Import::sync_member( $post_id );
+		OpenAlex_Helpers::clear_member_publications_cache( $post_id );
 
         // Guardar resultado para mostrarlo en el redirect
         set_transient( 'openalex_sync_result_' . get_current_user_id(), $result, 60 );

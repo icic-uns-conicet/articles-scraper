@@ -29,45 +29,54 @@ class OpenAlex_Single_Team {
      * Genera el bloque HTML e inyecta vía JS al final del contenedor del miembro.
      */
     public function inject_publications(): void {
-        if ( ! is_singular( 'team' ) ) return;
-        if ( ! OpenAlex_Helpers::teachpress_active() ) return;
+		if ( ! is_singular( 'team' ) ) return;
+		if ( ! OpenAlex_Helpers::teachpress_active() ) return;
 
-        global $post;
-        $pubs = OpenAlex_Helpers::get_member_publications( $post->ID );
-        if ( empty( $pubs ) ) return;
+		global $post;
+		$post_id = (int) $post->ID;
 
-        $html = $this->render_publications_html( $pubs );
-        ?>
-        <script>
-        (function () {
-            var html = <?php echo wp_json_encode( $html ); ?>;
-            var targets = [
-                '.tlp-single-container',
-                '.tlp-single-detail',
-                'article.type-team',
-                'main',
-                '#content',
-                '.site-content'
-            ];
-            function insert() {
-                for ( var i = 0; i < targets.length; i++ ) {
-                    var el = document.querySelector( targets[i] );
-                    if ( el ) {
-                        var div = document.createElement('div');
-                        div.innerHTML = html;
-                        el.appendChild(div);
-                        return;
-                    }
-                }
-                document.body.insertAdjacentHTML('beforeend', html);
-            }
-            document.readyState === 'loading'
-                ? document.addEventListener('DOMContentLoaded', insert)
-                : insert();
-        })();
-        </script>
-        <?php
-    }
+		$html_cache_key = 'openalex_member_pubs_html_' . $post_id;
+		$html = get_transient( $html_cache_key );
+
+		if ( $html === false ) {
+			$pubs = OpenAlex_Helpers::get_member_publications( $post_id );
+			if ( empty( $pubs ) ) return;
+
+			$html = $this->render_publications_html( $pubs );
+			set_transient( $html_cache_key, $html, 12 * HOUR_IN_SECONDS );
+		}
+
+		?>
+		<script>
+		(function () {
+			var html = <?php echo wp_json_encode( $html ); ?>;
+			var targets = [
+				'.tlp-single-container',
+				'.tlp-single-detail',
+				'article.type-team',
+				'main',
+				'#content',
+				'.site-content'
+			];
+			function insert() {
+				for ( var i = 0; i < targets.length; i++ ) {
+					var el = document.querySelector( targets[i] );
+					if ( el ) {
+						var div = document.createElement('div');
+						div.innerHTML = html;
+						el.appendChild(div);
+						return;
+					}
+				}
+				document.body.insertAdjacentHTML('beforeend', html);
+			}
+			document.readyState === 'loading'
+				? document.addEventListener('DOMContentLoaded', insert)
+				: insert();
+		})();
+		</script>
+		<?php
+	}
 
     public function enqueue_styles(): void {
         if ( ! is_singular( 'team' ) ) return;

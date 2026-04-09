@@ -2,8 +2,6 @@
 /**
  * Comunicación con la API de OpenAlex.
  *
- * Recupera works de un autor usando paginación cursor-based.
- *
  * @package OpenAlexTeam
  */
 
@@ -11,19 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class OpenAlex_API {
 
-    /** Máximo de páginas a recuperar (200 works/página → 2000 works máx) */
-    const MAX_PAGES = 10;
-
-    /** Works por página (máximo permitido por OpenAlex) */
-    const PER_PAGE = 200;
-
-    /** Campos solicitados en cada request */
+    const MAX_PAGES     = 10;
+    const PER_PAGE      = 200;
     const SELECT_FIELDS = 'id,title,type,publication_year,doi,authorships,biblio,primary_location,abstract_inverted_index';
 
     /**
      * Recupera todos los works de un autor.
      *
-     * @param  string $openalex_author_id  ID de OpenAlex, ej: "A123456789"
+     * @param  string $openalex_author_id
      * @return array{works: array, errors: string[]}
      */
     public static function fetch_works( string $openalex_author_id ): array {
@@ -33,22 +26,30 @@ class OpenAlex_API {
         $cursor    = '*';
 
         for ( $page = 0; $page < self::MAX_PAGES; $page++ ) {
-            $url = add_query_arg( [
+            $url = self::build_url( [
                 'filter'   => "author.id:{$author_id}",
                 'per-page' => self::PER_PAGE,
                 'cursor'   => $cursor,
                 'select'   => self::SELECT_FIELDS,
-            ], 'https://api.openalex.org/works' );
+            ] );
 
-            $response = wp_remote_get( $url, [ 'timeout' => 30 ] );
+            $response = wp_remote_get( $url, [
+                'timeout' => 30,
+                'headers' => self::get_headers(),
+            ] );
 
             if ( is_wp_error( $response ) ) {
                 $errors[] = 'Error de conexión: ' . $response->get_error_message();
                 break;
             }
 
-            $body = json_decode( wp_remote_retrieve_body( $response ), true );
+            $code = wp_remote_retrieve_response_code( $response );
+            if ( $code < 200 || $code >= 300 ) {
+                $errors[] = 'OpenAlex devolvió HTTP ' . $code . ': ' . wp_remote_retrieve_body( $response );
+                break;
+            }
 
+            $body = json_decode( wp_remote_retrieve_body( $response ), true );
             if ( empty( $body['results'] ) ) break;
 
             $works  = array_merge( $works, $body['results'] );
@@ -58,5 +59,41 @@ class OpenAlex_API {
         }
 
         return compact( 'works', 'errors' );
+    }
+
+    /**
+     * Arma la URL con api_key y mailto si existen.
+     */
+    private static function build_url( array $args ): string {
+        $api_key = class_exists( 'OpenAlex_Settings' ) ? OpenAlex_Settings::get_api_key() : '';
+        $mailto  = class_exists( 'OpenAlex_Settings' ) ? OpenAlex_Settings::get_mailto()  : '';
+
+        if ( ! empty( $api_key ) ) {
+            $args['api_key'] = $api_key;
+        }
+
+        if ( ! empty( $mailto ) ) {
+            $args['mailto'] = $mailto;
+        }
+
+        return add_query_arg( $args, 'https://api.openalex.org/works' );
+    }
+
+    /**
+     * User-Agent opcional con mailto.
+     */
+    private static function get_headers(): array {
+        $headers = [
+            'Accept' => 'application/json',
+        ];
+
+        $mailto = class_exists( 'OpenAlex_Settings' ) ? OpenAlex_Settings::get_mailto() : '';
+        if ( $mailto ) {
+            $headers['User-Agent'] = 'OpenAlexTeamPlugin/4.0 (mailto:' . $mailto . ')';
+        } else {
+            $headers['User-Agent'] = 'OpenAlexTeamPlugin/4.0';
+        }
+
+        return $headers;
     }
 }

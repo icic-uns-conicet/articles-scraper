@@ -169,27 +169,45 @@ class OpenAlex_Helpers {
      * @param bool $only_visible Si true, excluye las marcadas como ocultas.
      */
     public static function get_member_publications( int $post_id, bool $only_visible = true ): array {
-        global $wpdb;
+		global $wpdb;
 
-        $sql = "
-            SELECT p.pub_id, p.title, p.type, DATE_FORMAT(p.date,'%%Y') AS year,
-                   p.doi, p.url, p.author, p.journal
-            FROM {$wpdb->prefix}teachpress_pub p
-            INNER JOIN {$wpdb->prefix}teachpress_pub_meta m
-                ON m.pub_id = p.pub_id
-            LEFT JOIN {$wpdb->prefix}teachpress_pub_meta h
-                ON h.pub_id = p.pub_id
-               AND h.meta_key = 'openalex_hidden'
-            WHERE m.meta_key = 'openalex_member_id'
-              AND m.meta_value = %s
-        ";
+		$suffix        = $only_visible ? 'visible' : 'all';
+		$transient_key = 'openalex_member_pubs_' . $post_id . '_' . $suffix;
 
-        if ( $only_visible ) {
-            $sql .= " AND (h.meta_value IS NULL OR h.meta_value != '1')";
-        }
+		$cached = get_transient( $transient_key );
+		if ( $cached !== false ) {
+			return $cached;
+		}
 
-        $sql .= " ORDER BY p.date DESC";
+		$sql = "
+			SELECT p.pub_id, p.title, p.type, DATE_FORMAT(p.date,'%%Y') AS year,
+				   p.doi, p.url, p.author, p.journal
+			FROM {$wpdb->prefix}teachpress_pub p
+			INNER JOIN {$wpdb->prefix}teachpress_pub_meta m
+				ON m.pub_id = p.pub_id
+			LEFT JOIN {$wpdb->prefix}teachpress_pub_meta h
+				ON h.pub_id = p.pub_id
+			   AND h.meta_key = 'openalex_hidden'
+			WHERE m.meta_key = 'openalex_member_id'
+			  AND m.meta_value = %s
+		";
 
-        return $wpdb->get_results( $wpdb->prepare( $sql, $post_id ) );
-    }
+		if ( $only_visible ) {
+			$sql .= " AND (h.meta_value IS NULL OR h.meta_value != '1')";
+		}
+
+		$sql .= " ORDER BY p.date DESC";
+
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, $post_id ) );
+
+		set_transient( $transient_key, $results, 12 * HOUR_IN_SECONDS );
+
+		return $results;
+	}
+	
+	public static function clear_member_publications_cache( int $post_id ): void {
+		delete_transient( 'openalex_member_pubs_' . $post_id . '_visible' );
+		delete_transient( 'openalex_member_pubs_' . $post_id . '_all' );
+		delete_transient( 'openalex_member_pubs_html_' . $post_id );
+	}
 }
