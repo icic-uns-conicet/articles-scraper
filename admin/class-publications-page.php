@@ -71,16 +71,21 @@ class OpenAlex_Publications_Page {
 
         if ( empty( $members ) ) {
             echo '<div class="notice notice-info inline"><p>'
-               . 'No hay miembros con OpenAlex ID. '
-               . '<a href="' . esc_url( admin_url( 'edit.php?post_type=team' ) ) . '">Asignalos desde la lista de Team</a>.'
-               . '</p></div>';
+            . 'No hay miembros con OpenAlex ID. '
+            . '<a href="' . esc_url( admin_url( 'edit.php?post_type=team' ) ) . '">Asignalos desde la lista de Team</a>.'
+            . '</p></div>';
             return;
         }
         ?>
         <p>Miembros con OpenAlex ID: <strong><?php echo count( $members ); ?></strong></p>
         <table class="widefat striped">
             <thead><tr>
-                <th>Nombre</th><th>Equipos</th><th>OpenAlex ID</th><th>Última sync</th><th>Acción</th>
+                <th>Nombre</th>
+                <th>Equipos</th>
+                <th>OpenAlex ID</th>
+                <th>Última sync</th>
+                <th>Estado</th>
+                <th>Acción</th>
             </tr></thead>
             <tbody>
             <?php foreach ( $members as $m ):
@@ -88,7 +93,9 @@ class OpenAlex_Publications_Page {
                 $last_sync   = get_post_meta( $m->ID, 'openalex_last_sync', true );
                 $terms       = get_the_terms( $m->ID, 'team_designation' );
                 $team_names  = ( ! empty( $terms ) && ! is_wp_error( $terms ) )
-                               ? implode( ', ', wp_list_pluck( $terms, 'name' ) ) : '—';
+                            ? implode( ', ', wp_list_pluck( $terms, 'name' ) ) : '—';
+
+                $job = OpenAlex_Job_Queue::get_member_status( $m->ID );
             ?>
             <tr>
                 <td><strong><?php echo esc_html( $m->post_title ); ?></strong></td>
@@ -98,14 +105,36 @@ class OpenAlex_Publications_Page {
                     ? esc_html( date_i18n( get_option( 'date_format' ) . ' H:i', strtotime( $last_sync ) ) )
                     : '<em style="color:#8c8f94;">Nunca</em>'; ?></td>
                 <td>
+                    <?php
+                    $color = '#646970';
+                    if ( $job['status'] === 'queued' )   $color = '#996800';
+                    if ( $job['status'] === 'running' )  $color = '#135e96';
+                    if ( $job['status'] === 'completed') $color = '#0a7a20';
+                    if ( $job['status'] === 'failed' )   $color = '#b32d2e';
+
+                    echo '<strong style="color:' . esc_attr( $color ) . ';">' . esc_html( strtoupper( $job['status'] ) ) . '</strong><br>';
+                    echo '<span style="color:#646970;">' . esc_html( $job['message'] ) . '</span>';
+                    ?>
+                </td>
+                <td>
                     <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline;">
                         <input type="hidden" name="action"  value="openalex_sync">
                         <input type="hidden" name="post_id" value="<?php echo $m->ID; ?>">
                         <?php wp_nonce_field( 'openalex_sync_' . $m->ID, 'openalex_sync_nonce' ); ?>
-                        <button type="submit" class="button button-primary">
-                            <?php echo $last_sync ? '↻ Re-sincronizar' : '⬇ Sincronizar'; ?>
+
+                        <button type="submit" class="button button-primary" <?php disabled( $job['is_locked'], true ); ?>>
+                            <?php
+                            if ( $job['status'] === 'queued' ) {
+                                echo 'En cola...';
+                            } elseif ( $job['status'] === 'running' ) {
+                                echo 'Procesando...';
+                            } else {
+                                echo $last_sync ? '↻ Re-sincronizar' : '⬇ Sincronizar';
+                            }
+                            ?>
                         </button>
                     </form>
+
                     <a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=openalex-publications&post_id=' . $m->ID ) ); ?>">
                         Ver publicaciones
                     </a>
@@ -126,6 +155,7 @@ class OpenAlex_Publications_Page {
 
         $openalex_id = get_post_meta( $post_id, 'openalex_id', true );
         $last_sync   = get_post_meta( $post_id, 'openalex_last_sync', true );
+        $job         = OpenAlex_Job_Queue::get_member_status( $post_id );
 
         echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=openalex-publications' ) ) . '">← Volver</a></p>';
         echo '<h2>' . esc_html( $post->post_title ) . '</h2>';
@@ -147,9 +177,18 @@ class OpenAlex_Publications_Page {
             <input type="hidden" name="post_id"  value="<?php echo $post_id; ?>">
             <input type="hidden" name="redirect" value="detail">
             <?php wp_nonce_field( 'openalex_sync_' . $post_id, 'openalex_sync_nonce' ); ?>
-            <button type="submit" class="button button-primary">
-                <?php echo $last_sync ? '↻ Re-sincronizar publicaciones' : '⬇ Sincronizar publicaciones'; ?>
+            <button type="submit" class="button button-primary" <?php disabled( $job['is_locked'], true ); ?>>
+                <?php
+                if ( $job['status'] === 'queued' ) {
+                    echo 'En cola...';
+                } elseif ( $job['status'] === 'running' ) {
+                    echo 'Procesando...';
+                } else {
+                    echo $last_sync ? '↻ Re-sincronizar publicaciones' : '⬇ Sincronizar publicaciones';
+                }
+                ?>
             </button>
+            <span style="margin-left:10px;color:#646970;"><?php echo esc_html( $job['message'] ); ?></span>
         </form>
         <?php
 

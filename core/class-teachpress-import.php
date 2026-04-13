@@ -22,6 +22,7 @@ class OpenAlex_TeachPress_Import {
             'member_name' => get_the_title( $post_id ),
             'total_found' => 0,
             'added'       => 0,
+            'updated'     => 0,
             'skipped'     => 0,
             'errors'      => [],
         ];
