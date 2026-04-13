@@ -1,4 +1,4 @@
 * hacer que al encontrar un autor que ya está en el listado de miembros con openalex_id, les incluya un link en el listado de publicaciones.
 * ver de aumentar la información usando sedici u otras fuentes, esto debería agregarse en el plugin teachPress directamente. Como buscar todos las publicaciones que no tienen todos los campos que necesita el tipo de publicación.
 * action scheluler para resincronizar todos cada  ... 1 mes?
-
+* ver si updated_date en el autor sirve para no tener que volver a pedir los works. ver documentación.
