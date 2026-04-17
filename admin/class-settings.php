@@ -375,4 +375,10 @@ class OpenAlex_Settings
         $opts = self::get_options();
         return $opts['api_key'] ?? '';
     }
+
+    public static function get_mailto(): string
+    {
+        $opts = self::get_options();
+        return $opts['api_email'] ?? '';
+    }
 }
