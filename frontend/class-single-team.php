@@ -12,10 +12,13 @@ if (! defined('ABSPATH')) exit;
 class OpenAlex_Single_Team
 {
 
+    private $post_id;
+
     public function __construct()
     {
         add_filter('template_include',   [$this, 'intercept_template'], 99);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_styles']);
+
     }
 
     /**
@@ -38,13 +41,13 @@ class OpenAlex_Single_Team
         if (! OpenAlex_Helpers::teachpress_active()) return;
 
         global $post;
-        $post_id = (int) $post->ID;
+        $this->post_id = (int) $post->ID;        
 
-        $html_cache_key = 'openalex_member_pubs_html_' . $post_id;
-        $html = get_transient($html_cache_key);
+        $html_cache_key = 'openalex_member_pubs_html_' . $this->post_id;
+        $html = get_transient($html_cache_key); // <---
 
         if ($html === false) {
-            $pubs = OpenAlex_Helpers::get_member_publications($post_id);
+            $pubs = OpenAlex_Helpers::get_member_publications($this->post_id);
             if (empty($pubs)) return;
 
             $html = $this->render_publications_html($pubs);
@@ -52,7 +55,7 @@ class OpenAlex_Single_Team
         }
 
 ?>
-        <script>
+        <script id="openalex_publications">
             (function() {
                 var html = <?php echo wp_json_encode($html); ?>;
                 var targets = [
@@ -135,7 +138,21 @@ class OpenAlex_Single_Team
                                 </span>
                                 <?php if ($pub->author): ?>
                                     <span class="openalex-pub-authors">
-                                        <?php echo OpenAlex_Helpers::format_author_list(
+                                        <?php 
+                                                if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
+            error_log( 
+                sprintf(
+                    '[OpenAlex] class-sinlge-team author %d| name-id %s | member-map %d ',
+                    
+                                            $pub->author,
+                                            print_r($name_to_id_map, true ),
+                                            print_r($members_map, true )
+                    )
+                );
+        }
+                                        
+                                        
+                                        echo OpenAlex_Helpers::format_author_list(
                                             $pub->author,
                                             true,
                                             $name_to_id_map,

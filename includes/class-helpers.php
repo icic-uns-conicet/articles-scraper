@@ -131,6 +131,10 @@ class OpenAlex_Helpers
                 $current_openalex_id = strtoupper(basename($raw));
             }
         }
+        
+         $result = "<span class=\"current\" id=\"".  $current_openalex_id   . "\"></span>";
+         $json = htmlspecialchars(json_encode($name_to_id_map), ENT_QUOTES, 'UTF-8'); 
+         $result .= "<span data-map='". $json ."'></span>";
 
         foreach (array_slice($names, 0, 5) as $name) {
             $parts    = explode(',', $name, 2);
@@ -150,6 +154,8 @@ class OpenAlex_Helpers
             if ($link_team_members && $name_to_id_map !== null && $members_map !== null) {
                 $normalized      = strtolower(trim($name));
                 $openalex_author = $name_to_id_map[$normalized] ?? null;
+                
+                $result .= "<span id=\"". $name . $normalized . "--" . $openalex_author   . "\"></span>";
 
                 if (
                     $openalex_author &&
@@ -169,7 +175,7 @@ class OpenAlex_Helpers
             $short[] = $display;
         }
 
-        $result = implode(', ', $short);
+        $result .= implode(', ', $short);
         if (count($names) > 5) $result .= ' et al.';
 
         return $result;
@@ -311,6 +317,15 @@ class OpenAlex_Helpers
             $clean_id          = strtoupper(basename($raw_id));
             $map[$clean_id]  = get_permalink($post->ID);
         }
+		
+		
+		if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
+                error_log( 
+                    sprintf(
+                    '[OpenAlex] OpenAlex_Helpers::get_team_members_map()\n%s ', print_r( $map, true )
+                    )
+                    );
+        }
 
         return $map;
     }
@@ -350,6 +365,14 @@ class OpenAlex_Helpers
                 $map[intval($author_id)] = strtoupper($openalex_value);
             }
         }
+        
+        if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
+            error_log( 
+                sprintf(
+                    '[OpenAlex] OpenAlex_Helpers::get_pub_author_openalex_ids()\n%s | %d', print_r( $map, true ), $pub_id
+                    )
+                );
+        }
 
         return $map;
     }
@@ -376,7 +399,16 @@ class OpenAlex_Helpers
             $pub_id
         ));
 
-        if (empty($rows)) return [];
+        if (empty($rows)) {
+            if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
+            error_log( 
+                sprintf(
+                    '[OpenAlex] OpenAlex_Helpers::get_pub_name_to_openalex_id()\ empty rows| %d',  $pub_id
+                    )
+                );
+            }        
+            return [];
+        }
 
         $map = [];
         foreach ($rows as $row) {
@@ -393,6 +425,25 @@ class OpenAlex_Helpers
                 $map[$normalized] = strtoupper($openalex_value);
             }
         }
+        
+        if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
+            error_log(
+                sprintf(
+                    '[OpenAlex] last query \n%s', $wpdb->last_query
+                    )
+                );
+            
+            error_log(
+                sprintf(
+                    '[OpenAlex] OpenAlex_Helpers::get_pub_name_to_openalex_id() rows \n%s | %d', print_r( $rows, true ), $pub_id
+                    )
+                );
+            error_log( 
+                sprintf(
+                    '[OpenAlex] OpenAlex_Helpers::get_pub_name_to_openalex_id() map \n%s | %d', print_r( $map, true ), $pub_id
+                    )
+                );
+        }        
 
         return $map;
     }

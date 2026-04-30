@@ -14,7 +14,7 @@ class OpenAlex_Settings
     const OPTION_GROUP = 'openalex_team_settings';
     const OPTION_NAME  = 'openalex_team_options';
     const PAGE_SLUG    = 'openalex-team-settings';
-
+   
     public function __construct()
     {
         add_action('admin_menu',  [$this, 'register_menu']);
@@ -95,6 +95,13 @@ class OpenAlex_Settings
     {
         $output = [];
         $output['api_email']    = sanitize_email($input['api_email'] ?? '');
+		if (!empty($input['api_key'])) {
+    		$output['api_key'] = sanitize_text_field($input['api_key']);
+		} else {
+    		// mantener la existente
+    		$current = get_option(self::OPTION_NAME, []);
+    		$output['api_key'] = $current['api_key'] ?? '';
+		}
         $output['sync_interval'] = in_array($input['sync_interval'] ?? '', ['manual', 'hourly', 'twicedaily', 'daily', 'weekly'], true)
             ? $input['sync_interval']
             : 'daily';
@@ -369,7 +376,7 @@ class OpenAlex_Settings
         $saved = get_option(self::OPTION_NAME, []);
         return wp_parse_args($saved, $defaults);
     }
-
+    
     public static function get_api_key(): string
     {
         $opts = self::get_options();
@@ -381,4 +388,6 @@ class OpenAlex_Settings
         $opts = self::get_options();
         return $opts['api_email'] ?? '';
     }
+
+    
 }

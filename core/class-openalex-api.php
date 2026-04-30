@@ -35,7 +35,9 @@ class OpenAlex_API
                 'cursor'   => $cursor,
                 'select'   => self::SELECT_FIELDS,
             ]);
-
+            
+            $start    = microtime(true);
+            
             $response = wp_remote_get($url, [
                 'timeout' => 30,
                 'headers' => self::get_headers(),
@@ -50,6 +52,14 @@ class OpenAlex_API
             if ($code < 200 || $code >= 300) {
                 $errors[] = 'OpenAlex devolvió HTTP ' . $code . ': ' . wp_remote_retrieve_body($response);
                 break;
+            }
+            
+            if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
+                error_log( sprintf(
+                    '[OpenAlex] %s | status: %d | %.0fms | member: %d',
+                    $url, wp_remote_retrieve_response_code($response),
+                    (microtime(true) - $start) * 1000, $author_id
+                ));
             }
 
             $body = json_decode(wp_remote_retrieve_body($response), true);
