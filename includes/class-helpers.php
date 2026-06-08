@@ -123,19 +123,34 @@ class OpenAlex_Helpers
             $members_map = self::get_team_members_map();
         }
 
-        // openalex_id del miembro actual para excluirlo de los enlaces
-        $current_openalex_id = '';
+        // NUEVO: Obtener TODOS los IDs del miembro actual
+        $current_openalex_ids = [];
         if ($current_post_id > 0) {
             $raw = trim(get_post_meta($current_post_id, 'openalex_id', true));
             if ($raw) {
-                $current_openalex_id = strtoupper(basename($raw));
+                $ids = array_map('trim', explode('|', $raw));
+                foreach ($ids as $id) {
+                    $current_openalex_ids[] = strtoupper(basename($id));
+                }
             }
         }
-        
-         $result = "<span class=\"current\" id=\"".  $current_openalex_id   . "\"></span>";
-         $json = htmlspecialchars(json_encode($name_to_id_map), ENT_QUOTES, 'UTF-8'); 
-         $result .= "<span data-map='". $json ."'></span>";
 
+        if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
+            error_log( 
+                sprintf(
+                    '[OpenAlex] class-helpers author %d| name-id %s | member-map %d ',
+                    
+                                            $author_string,
+                                            print_r($name_to_id_map, true ),
+                                            print_r($members_map, true )
+                    )
+                );
+        }
+        /*
+        $result = "<span class=\"current\" id=\"".  $current_openalex_id   . "\"></span>";
+        $json = htmlspecialchars(json_encode($name_to_id_map), ENT_QUOTES, 'UTF-8'); 
+        $result .= "<span data-map='". $json ."'></span>";
+        */
         foreach (array_slice($names, 0, 5) as $name) {
             $parts    = explode(',', $name, 2);
             $last     = trim($parts[0]);
@@ -155,16 +170,22 @@ class OpenAlex_Helpers
                 $normalized      = strtolower(trim($name));
                 $openalex_author = $name_to_id_map[$normalized] ?? null;
                 
-                $result .= "<span id=\"". $name . $normalized . "--" . $openalex_author   . "\"></span>";
+                // $result .= "<span id=\"". $name . $normalized . "--" . $openalex_author   . "\"></span>";
 
-                if (
-                    $openalex_author &&
-                    isset($members_map[strtoupper($openalex_author)]) &&
-                    strtoupper($openalex_author) !== $current_openalex_id
-                ) {
-                    $url     = $members_map[strtoupper($openalex_author)];
-                    $display = '<a href="' . esc_url($url) . '">' . esc_html($display) . '</a>';
-                    $linked  = true;
+                if ($openalex_author) {
+                    $openalex_author_upper = strtoupper($openalex_author);
+                    
+                    // NUEVO: Verificar si coincide con cualquier ID del miembro actual
+                    $is_current_member = in_array($openalex_author_upper, $current_openalex_ids, true);
+                    
+                    if (
+                        isset($members_map[$openalex_author_upper]) &&
+                        ! $is_current_member  // ← No enlazar si es el miembro actual
+                    ) {
+                        $url = $members_map[$openalex_author_upper];
+                        $display = '<a href="' . esc_url($url) . '">' . esc_html($display) . '</a>';
+                        $linked = true;
+                    }
                 }
             }
 
@@ -175,7 +196,7 @@ class OpenAlex_Helpers
             $short[] = $display;
         }
 
-        $result .= implode(', ', $short);
+        $result = implode(', ', $short);
         if (count($names) > 5) $result .= ' et al.';
 
         return $result;
@@ -314,8 +335,18 @@ class OpenAlex_Helpers
         foreach ($posts as $post) {
             $raw_id = trim(get_post_meta($post->ID, 'openalex_id', true));
             if (! $raw_id) continue;
-            $clean_id          = strtoupper(basename($raw_id));
-            $map[$clean_id]  = get_permalink($post->ID);
+
+            // NUEVO: Dividir por pipe y procesar cada ID
+            $ids = array_map('trim', explode('|', $raw_id));
+            $permalink = get_permalink($post->ID);
+        
+            foreach ($ids as $single_id) {
+                if (! $single_id) continue;
+                $clean_id = strtoupper(basename($single_id));
+                if ($clean_id) {
+                    $map[$clean_id] = $permalink;  // Todos los IDs apuntan al mismo miembro
+                }
+            }
         }
 		
 		
@@ -391,6 +422,7 @@ class OpenAlex_Helpers
         $authors_table = $wpdb->prefix . 'teachpress_authors';
         $rel_table     = $wpdb->prefix . 'teachpress_rel_pub_auth';
 
+        // 1. Obtener todos los autores asociados a esta publicación
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT r.author_id, a.name
          FROM {$rel_table} r
@@ -412,10 +444,11 @@ class OpenAlex_Helpers
 
         $map = [];
         foreach ($rows as $row) {
+            // 2. Buscar el meta guardado durante la importación
             $meta_key       = 'openalex_author_id_' . intval($row->author_id);
             $openalex_value = $wpdb->get_var($wpdb->prepare(
                 "SELECT meta_value FROM {$meta_table}
-             WHERE pub_id = %d AND meta_key = %s LIMIT 1",
+                    WHERE pub_id = %d AND meta_key = %s LIMIT 1",
                 $pub_id,
                 $meta_key
             ));
@@ -423,6 +456,19 @@ class OpenAlex_Helpers
             if ($openalex_value) {
                 $normalized        = strtolower(trim($row->name));
                 $map[$normalized] = strtoupper($openalex_value);
+
+                $raw_ids = array_map('trim', explode('|', $openalex_value));
+                $clean_id = '';
+
+                foreach ($raw_ids as $id) {
+                    // Extraer solo la parte del ID (ej: de 'https://.../A123' a 'A123')
+                    $clean_id = strtoupper(basename($id));                    
+                    // 3. Si logramos extraer un ID limpio, lo agregamos al mapa
+                    if ($clean_id) {
+                        $normalized_name = strtolower(trim($row->name));
+                        $map[$normalized_name] = $clean_id;
+                    }
+                }
             }
         }
         

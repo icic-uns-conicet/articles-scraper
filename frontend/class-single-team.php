@@ -142,7 +142,7 @@ class OpenAlex_Single_Team
                                                 if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
             error_log( 
                 sprintf(
-                    '[OpenAlex] class-sinlge-team author %d| name-id %s | member-map %d ',
+                    '[OpenAlex] render_publications_html author %d| name-id %s | member-map %d ',
                     
                                             $pub->author,
                                             print_r($name_to_id_map, true ),

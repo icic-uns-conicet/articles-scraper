@@ -134,7 +134,25 @@ class OpenAlex_Admin_Columns {
             ! isset( $_POST['openalex_quick_edit_nonce_field'] ) ||
             ! wp_verify_nonce( $_POST['openalex_quick_edit_nonce_field'], 'openalex_quick_edit_nonce' )
         ) return;
-        update_post_meta( $post_id, 'openalex_id', sanitize_text_field( $_POST['openalex_id'] ) );
+
+        $raw_value = sanitize_text_field($_POST['openalex_id']);
+        
+        // NUEVO: Normalizar el formato
+        // Aceptar: "A123|A456", "https://openalex.org/A123|A456", etc.
+        $ids = array_map('trim', explode('|', $raw_value));
+        $clean_ids = [];
+        
+        foreach ($ids as $id) {
+            if (! $id) continue;
+            $clean = strtoupper(basename($id));
+            if ($clean) {
+                $clean_ids[] = $clean;
+            }
+        }
+        
+        // Guardar en formato limpio: "A123|A456"
+        $final_value = implode('|', array_unique($clean_ids));
+        update_post_meta($post_id, 'openalex_id', $final_value);        
     }
 
     // ── Row actions ───────────────────────────────────────────────────────────
