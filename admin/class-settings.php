@@ -20,6 +20,9 @@ class OpenAlex_Settings
         add_action('admin_menu',  [$this, 'register_menu']);
         add_action('admin_init',  [$this, 'register_settings']);
         add_action('admin_post_openalex_migrate_author_ids', [$this, 'handle_migrate_author_ids']);
+        add_action('update_option_' . self::OPTION_NAME, [$this, 'on_settings_updated']);
+        add_action('openalex_sync_all_members', [$this, 'sync_all_members']);
+        add_action('wp_loaded', [$this, 'ensure_schedule']);
     }
 
     public function register_menu(): void
@@ -387,6 +390,117 @@ class OpenAlex_Settings
     {
         $opts = self::get_options();
         return $opts['api_email'] ?? '';
+    }
+
+    /**
+     * Ensure the recurring sync schedule is in place based on settings.
+     */
+    public function ensure_schedule(): void
+    {
+        if (!function_exists('as_get_scheduled_actions')) {
+            return; // Action Scheduler not available
+        }
+
+        $opts = self::get_options();
+        $interval = $opts['sync_interval'] ?? 'daily';
+
+        // Check if already scheduled
+        $scheduled = as_get_scheduled_actions([
+            'hook' => 'openalex_sync_all_members',
+            'group' => 'openalex-team',
+        ], 'ids');
+
+        if (!empty($scheduled)) {
+            return; // Already scheduled
+        }
+
+        if ($interval !== 'manual') {
+            $this->schedule_recurring_sync();
+        }
+    }
+
+    /**
+     * Schedule recurring synchronization based on the configured interval.
+     */
+    private function schedule_recurring_sync(): void
+    {
+        if (!function_exists('as_schedule_recurring_action')) {
+            return; // Action Scheduler not available
+        }
+
+        $opts = self::get_options();
+        $interval = $opts['sync_interval'] ?? 'daily';
+
+        if ($interval === 'manual') {
+            return;
+        }
+
+        $intervals_map = [
+            'hourly'     => HOUR_IN_SECONDS,
+            'twicedaily' => 12 * HOUR_IN_SECONDS,
+            'daily'      => DAY_IN_SECONDS,
+            'weekly'     => WEEK_IN_SECONDS,
+        ];
+
+        $seconds = $intervals_map[$interval] ?? DAY_IN_SECONDS;
+
+        as_schedule_recurring_action(
+            time(),
+            $seconds,
+            'openalex_sync_all_members',
+            [],
+            'openalex-team'
+        );
+    }
+
+    /**
+     * Unschedule all recurring synchronizations.
+     */
+    private function unschedule_recurring_sync(): void
+    {
+        if (!function_exists('as_unschedule_all_actions')) {
+            return; // Action Scheduler not available
+        }
+
+        as_unschedule_all_actions('openalex_sync_all_members', [], 'openalex-team');
+    }
+
+    /**
+     * Handle settings update: reschedule sync if interval changed.
+     */
+    public function on_settings_updated(): void
+    {
+        $this->unschedule_recurring_sync();
+        $this->ensure_schedule();
+    }
+
+    /**
+     * Sync all team members with OpenAlex.
+     * Enqueues a sync job for the 5 oldest synched team members.
+     */
+    public function sync_all_members(): void
+    {
+        if (!class_exists('OpenAlex_Job_Queue')) {
+            return;
+        }
+
+        global $wpdb;
+
+        // Get the 5 oldest synched team members (by openalex_sync_finished_at)
+        $members = $wpdb->get_col($wpdb->prepare(
+            "SELECT p.ID FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_id ON p.ID = pm_id.post_id AND pm_id.meta_key = 'openalex_id'
+             LEFT JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id AND pm_date.meta_key = 'openalex_sync_finished_at'
+             WHERE p.post_type = 'team'
+             AND p.post_status = 'publish'
+             AND pm_id.meta_value != ''
+             ORDER BY CAST(pm_date.meta_value AS DATETIME) ASC, p.ID ASC
+             LIMIT 5"
+        ));
+
+        foreach ($members as $member_id) {
+            OpenAlex_Job_Queue::enqueue_member_sync(intval($member_id));
+        }
     }
 
     
