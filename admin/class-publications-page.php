@@ -26,6 +26,7 @@ class OpenAlex_Publications_Page
             "ajax_toggle_publication_visibility",
         ]);
         add_action("admin_post_openalex_invalidate_transients", [$this, "handle_invalidate_transients"]);
+        add_action('wp_ajax_openalex_check_sync_status', [$this, 'ajax_check_sync_status']);
     }
 
     public function check_permissions(): void
@@ -57,7 +58,9 @@ class OpenAlex_Publications_Page
             esc_html__("Publicaciones OpenAlex", "openalex-team") .
             "</h1>";
 
-        $this->render_invalidate_transients_button();        $this->maybe_show_cache_cleared_notice();        $this->maybe_show_sync_notice();
+        $this->render_invalidate_transients_button();
+        $this->maybe_show_cache_cleared_notice();
+        $this->maybe_show_sync_notice();
 
         if ($post_id) {
             $this->render_member_detail($post_id);
@@ -111,18 +114,26 @@ class OpenAlex_Publications_Page
         }
         delete_transient($key);
 
-        echo '<div class="notice notice-success is-dismissible"><p>';
-        echo 'Caché de publicaciones limpiado correctamente.';
+        echo '<div class="notice notice-success is-dismissible"><p>';        
+        echo esc_html($cleared);
         echo '</p></div>';
     }
 
     private function render_invalidate_transients_button(): void
     {
-        ?>
+        $member_id = isset($_GET['post_id']) ? intval(sanitize_text_field($_GET['post_id'])) : 0;
+        if ($member_id > 0) {
+            // Vista de detalle de un miembro: botón específico
+            $button_text = '🗑️ Limpiar caché miembro';
+        } else {
+            // Vista de lista: botón global
+            $button_text = 'Limpiar caché de publicaciones';
+        }
+            ?>
         <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;">
             <input type="hidden" name="action" value="openalex_invalidate_transients">
             <?php wp_nonce_field('openalex_invalidate_transients', 'openalex_invalidate_nonce'); ?>
-            <?php submit_button('Limpiar caché de publicaciones', 'secondary', 'submit', false); ?>
+            <?php submit_button($button_text, 'secondary', 'submit', false); ?>
         </form>
         <br><br>
         <?php
@@ -141,24 +152,37 @@ class OpenAlex_Publications_Page
             wp_die('Nonce inválido.', 403);
         }
 
-        // Clear all member publication caches
-        $members = get_posts([
-            'post_type'   => 'team',
-            'numberposts' => -1,
-            'meta_query'  => [[
-                'key'     => 'openalex_id',
-                'value'   => '',
-                'compare' => '!=',
-            ]],
-        ]);
+        //
+        $member_id = isset($_GET['post_id']) ? intval($_GET['post_id']) : 0;
+        
+        if ($member_id > 0) {
+            OpenAlex_Helpers::clear_member_publications_cache($member_id);
+        } else {        
+            // Clear all member publication caches
+            $members = get_posts([
+                'post_type'   => 'team',
+                'numberposts' => -1,
+                'meta_query'  => [[
+                    'key'     => 'openalex_id',
+                    'value'   => '',
+                    'compare' => '!=',
+                ]],
+            ]);
 
-        foreach ($members as $member) {
-            OpenAlex_Helpers::clear_member_publications_cache($member->ID);
+            foreach ($members as $member) {
+                OpenAlex_Helpers::clear_member_publications_cache($member->ID);
+            }
         }
 
-        set_transient('openalex_cache_cleared_' . get_current_user_id(), true, 60);
+        set_transient('openalex_cache_cleared_' . get_current_user_id(), true, 60);        
 
-        wp_redirect(admin_url('admin.php?page=openalex-publications'));
+        $redirect_url = admin_url('admin.php?page=openalex-publications');
+        if ($member_id > 0) {
+            $redirect_url = add_query_arg('post_id', $member_id, $redirect_url);
+        }
+        
+        wp_redirect($redirect_url);
+
         exit;
     }
 
@@ -209,7 +233,7 @@ class OpenAlex_Publications_Page
 
                 $job = OpenAlex_Job_Queue::get_member_status($m->ID);
                 ?>
-            <tr>
+            <tr data-member-id="<?php echo esc_attr($m->ID); ?>">
                 <td><strong><?php echo esc_html(
                     $m->post_title
                 ); ?></strong></td>
@@ -223,7 +247,7 @@ class OpenAlex_Publications_Page
                         )
                     )
                     : '<em style="color:#8c8f94;">Nunca</em>'; ?></td>
-                <td>
+                <td class="openalex-status">
                     <?php
                     $color = "#646970";
                     if ($job["status"] === "queued") {
@@ -239,12 +263,12 @@ class OpenAlex_Publications_Page
                         $color = "#b32d2e";
                     }
 
-                    echo '<strong style="color:' .
+                    echo '<strong class="openalex-status-text" style="color:' .
                         esc_attr($color) .
                         ';">' .
                         esc_html(strtoupper($job["status"])) .
                         "</strong><br>";
-                    echo '<span style="color:#646970;">' .
+                    echo '<span class="openalex-status-message" style="color:#646970;">' .
                         esc_html($job["message"]) .
                         "</span>";
                     ?>
@@ -670,7 +694,39 @@ class OpenAlex_Publications_Page
         });
     });
     </script>
-    <?php
+    <?php    
+    }
+
+    /**
+    * Registra el hook de AJAX para verificar el estado de sincronización.
+    * Pon esto en el __construct() de tu clase de administración:
+    * add_action('wp_ajax_openalex_check_sync_status', [$this, 'ajax_check_sync_status']);
+    */
+    public function ajax_check_sync_status() {
+        // 1. Verificar seguridad (nonce)
+        check_ajax_referer('openalex_admin_nonce', 'nonce');
+
+        // 2. Obtener los IDs de las publicaciones/miembros que se muestran en la tabla
+        $post_ids = isset($_POST['post_ids']) ? array_map('intval', $_POST['post_ids']) : [];
+        
+        if (empty($post_ids)) {
+            wp_send_json_error('No post IDs provided');
+        }
+
+        // 3. Verificar el estado de cada uno (usando post_meta es mucho más rápido que consultar Action Scheduler)
+        $status_map = [];
+        foreach ($post_ids as $post_id) {
+            $status = get_post_meta($post_id, 'openalex_sync_status', true);
+            $last_sync = get_post_meta($post_id, 'openalex_last_sync', true);
+            
+            $status_map[$post_id] = [
+                'status' => $status ?: 'idle',
+                'last_sync' => $last_sync ?: ''
+            ];
+        }
+
+        // 4. Devolver la respuesta al frontend
+        wp_send_json_success($status_map);
     }
 }
 
@@ -899,5 +955,5 @@ class OpenAlex_Publications_Table extends WP_List_Table
         );
         sort($types);
         return $types;
-    }
+    }    
 }
