@@ -172,16 +172,61 @@ class OpenAlex_Admin_Columns {
         if ( $hook !== 'edit.php' || $post_type !== 'team' ) return;
         wp_register_script( 'openalex-quick-edit-js', false, [ 'inline-edit-post' ], OPENALEX_TEAM_VERSION, true );
         wp_enqueue_script( 'openalex-quick-edit-js' );
-        wp_add_inline_script( 'openalex-quick-edit-js', '
-(function ($) {
-    var $wpInlineEdit = inlineEditPost.edit;
-    inlineEditPost.edit = function (id) {
-        $wpInlineEdit.apply(this, arguments);
-        var postId = (typeof id === "object") ? this.getId(id) : id;
-        var currentId = $("#post-" + postId).find(".column-openalex_id .openalex-id-raw").text().trim();
-        $("input[name=\"openalex_id\"]", "#edit-" + postId).val(currentId);
-    };
-}(jQuery));
-        ' );
+        
+        $quick_edit_js = '(function ($) {
+            if (typeof inlineEditPost === "undefined") return;
+            var $wpInlineEdit = inlineEditPost.edit;
+            inlineEditPost.edit = function (id) {
+                $wpInlineEdit.apply(this, arguments);
+                var postId = (typeof id === "object") ? this.getId(id) : id;
+                var currentId = $("#post-" + postId).find(".column-openalex_id .openalex-id-raw").text().trim();
+                $("input[name=\"openalex_id\"]", "#edit-" + postId).val(currentId);
+            };
+        }(jQuery));';
+
+        $polling_js = '(function ($) {
+            if (!window.location.search.includes("page=openalex-publications")) return;
+            const $table = $(".widefat");
+            if ($table.length === 0) return;
+
+            let previousState = {};
+            $table.find("tbody tr").each(function() {
+                const memberId = $(this).data("member-id");
+                const status = $(this).find(".openalex-status-text").text().trim().toUpperCase();
+                
+                if (memberId && status) {
+                    previousState[memberId] = status;
+                }
+            });
+
+            if (Object.keys(previousState).length === 0) return;
+
+            function checkSyncStatus() {
+                $.post(openalex_admin_vars.ajax_url, {
+                    action: "openalex_check_sync_status",
+                    nonce: openalex_admin_vars.nonce,
+                    post_ids: Object.keys(previousState)
+                }, function(response) {
+                    if (response.success) {
+                        let hasChanges = false;
+                        $.each(response.data, function(postId, data) {
+                            if (previousState[postId] !== data.status) hasChanges = true;
+                        });
+                        if (hasChanges) {
+                            location.reload();
+                        } else {
+                            setTimeout(checkSyncStatus, 5000);
+                        }
+                    } else {
+                        setTimeout(checkSyncStatus, 10000);
+                    }
+                }).fail(function() {
+                    setTimeout(checkSyncStatus, 10000);
+                });
+            }
+            setTimeout(checkSyncStatus, 5000);
+        }(jQuery));';
+
+        wp_add_inline_script( 'openalex-quick-edit-js', $quick_edit_js . "\n" . $polling_js );
     }
 }
