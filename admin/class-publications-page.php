@@ -26,7 +26,7 @@ class OpenAlex_Publications_Page
             "ajax_toggle_publication_visibility",
         ]);
         add_action("admin_post_openalex_invalidate_transients", [$this, "handle_invalidate_transients"]);
-        add_action('wp_ajax_openalex_check_sync_status', [$this, 'ajax_check_sync_status']);
+        add_action('openalex_check_sync_status', [$this, 'ajax_check_sync_status']);
     }
 
     public function check_permissions(): void
