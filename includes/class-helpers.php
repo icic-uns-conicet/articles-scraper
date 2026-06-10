@@ -135,22 +135,9 @@ class OpenAlex_Helpers
             }
         }
 
-        if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
-            error_log( 
-                sprintf(
-                    '[OpenAlex] class-helpers author %d| name-id %s | member-map %d ',
-                    
-                                            $author_string,
-                                            print_r($name_to_id_map, true ),
-                                            print_r($members_map, true )
-                    )
-                );
-        }
-        /*
-        $result = "<span class=\"current\" id=\"".  $current_openalex_id   . "\"></span>";
-        $json = htmlspecialchars(json_encode($name_to_id_map), ENT_QUOTES, 'UTF-8'); 
-        $result .= "<span data-map='". $json ."'></span>";
-        */
+        OpenAlex_Helpers::log("format_author_list() called for author_string: '{$author_string}' |'.
+            ' current_openalex_ids: " . implode(', ', $current_openalex_ids) );    
+
         foreach (array_slice($names, 0, 5) as $name) {
             $parts    = explode(',', $name, 2);
             $last     = trim($parts[0]);
@@ -348,15 +335,7 @@ class OpenAlex_Helpers
                 }
             }
         }
-		
-		
-		if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
-                error_log( 
-                    sprintf(
-                    '[OpenAlex] OpenAlex_Helpers::get_team_members_map()\n%s ', print_r( $map, true )
-                    )
-                    );
-        }
+		OpenAlex_Helpers::log("get_team_members_map() loaded " .  print_r( $map, true ) . " members.");
 
         return $map;
     }
@@ -397,13 +376,7 @@ class OpenAlex_Helpers
             }
         }
         
-        if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
-            error_log( 
-                sprintf(
-                    '[OpenAlex] OpenAlex_Helpers::get_pub_author_openalex_ids()\n%s | %d', print_r( $map, true ), $pub_id
-                    )
-                );
-        }
+        OpenAlex_Helpers::log("get_pub_author_openalex_ids() for pub_id {$pub_id} returned map: " . print_r($map, true));
 
         return $map;
     }
@@ -432,13 +405,7 @@ class OpenAlex_Helpers
         ));
 
         if (empty($rows)) {
-            if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
-            error_log( 
-                sprintf(
-                    '[OpenAlex] OpenAlex_Helpers::get_pub_name_to_openalex_id()\ empty rows| %d',  $pub_id
-                    )
-                );
-            }        
+            OpenAlex_Helpers::log("get_pub_name_to_openalex_id() for pub_id {$pub_id} found no authors.");
             return [];
         }
 
@@ -474,24 +441,7 @@ class OpenAlex_Helpers
             }
         }
         
-        if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
-            error_log(
-                sprintf(
-                    '[OpenAlex] last query \n%s', $wpdb->last_query
-                    )
-                );
-            
-            error_log(
-                sprintf(
-                    '[OpenAlex] OpenAlex_Helpers::get_pub_name_to_openalex_id() rows \n%s | %d', print_r( $rows, true ), $pub_id
-                    )
-                );
-            error_log( 
-                sprintf(
-                    '[OpenAlex] OpenAlex_Helpers::get_pub_name_to_openalex_id() map \n%s | %d', print_r( $map, true ), $pub_id
-                    )
-                );
-        }        
+        OpenAlex_Helpers::log("get_pub_name_to_openalex_id() for pub_id {$pub_id} returned map: " . print_r($map, true));
 
         return $map;
     }
