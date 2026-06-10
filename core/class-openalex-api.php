@@ -51,16 +51,20 @@ class OpenAlex_API
             $code = wp_remote_retrieve_response_code($response);
             if ($code < 200 || $code >= 300) {
                 $errors[] = 'OpenAlex devolvió HTTP ' . $code . ': ' . wp_remote_retrieve_body($response);
+                OpenAlex_Helpers::log("Error fetching works for author_id {$author_id}. HTTP code: {$code}. Response: " . wp_remote_retrieve_body($response));
                 break;
             }
             
-            if ( defined('WP_DEBUG_LOG') && WP_DEBUG_LOG ) {
-                error_log( sprintf(
-                    '[OpenAlex] %s | status: %d | %.0fms | member: %d',
-                    $url, wp_remote_retrieve_response_code($response),
-                    (microtime(true) - $start) * 1000, $author_id
-                ));
-            }
+            $sanitized_url = preg_replace(
+                [ '/api_key=[^&]+/', '/mailto=[^&]+/' ],
+                [ 'api_key=[HIDDEN]', 'mailto=[HIDDEN]' ],
+                $url
+            );
+
+            OpenAlex_Helpers::log(sprintf(
+                "OpenAlex_API::fetch_works() | URL: %s | Status: %d | Time: %.0fms | Author ID: %s",
+                $sanitized_url, $code, (microtime(true) - $start) * 1000, $author_id
+            ));
 
             $body = json_decode(wp_remote_retrieve_body($response), true);
             if (empty($body['results'])) break;
