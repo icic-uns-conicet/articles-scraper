@@ -168,19 +168,13 @@ class OpenAlex_Admin_Columns {
     // ── Scripts admin ─────────────────────────────────────────────────────────
 
     public function enqueue_scripts( string $hook ): void {
-        global $post_type/*, $pagenow*/;
-
-        // if ( $hook !== 'edit.php' || $post_type !== 'team' ) return;
-        // edit.php?post_type=team&page=openalex-publications
-        $is_team_list = ($hook === 'edit.php' && $post_type === 'team');
-        // $is_openalex_page = ($pagenow === 'admin.php' && isset($_GET['page']) && $_GET['page'] === 'openalex-publications');
-
-        if (!$is_team_list/* && !$is_openalex_page*/) return;
+        // check if we're on the team list page or the quick edit is open for team post type
+        if (!($hook === 'team_page_openalex-publications')) return;
     
         wp_register_script( 'openalex-quick-edit-js', false, [ 'inline-edit-post' ], OPENALEX_TEAM_VERSION, true );
         wp_enqueue_script( 'openalex-quick-edit-js' );
 
-        wp_localize_script('openalex-admin-js', 'openalex_admin_vars', [
+        wp_localize_script('openalex-quick-edit-js', 'openalex_admin_vars', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('openalex_admin_nonce')
         ]);
