@@ -192,7 +192,7 @@ class OpenAlex_Admin_Columns {
 
         $polling_js = '(function ($) {
             if (!window.location.search.includes("page=openalex-publications")) return;
-            const $table = $(".widefat");
+            const $table = $(".openalex-members-table");
             if ($table.length === 0) return;
 
             let previousState = {};
@@ -211,6 +211,7 @@ class OpenAlex_Admin_Columns {
                 $.post(openalex_admin_vars.ajax_url, {
                     action: "openalex_check_sync_status",
                     nonce: openalex_admin_vars.nonce,
+                    security: openalex_admin_vars.nonce,
                     post_ids: Object.keys(previousState)
                 }, function(response) {
                     if (response.success) {
