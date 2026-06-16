@@ -26,9 +26,9 @@ class OpenAlex_Publications_Page
             "ajax_toggle_publication_visibility",
         ]);
         add_action("admin_post_openalex_invalidate_transients", [$this, "handle_invalidate_transients"]);
-        add_action('openalex_check_sync_status', [$this, 'ajax_check_sync_status']);
+        # el nombre del hook debe tener el prefijo wp_ajax_
+        add_action('wp_ajax_openalex_check_sync_status', [$this, 'ajax_check_sync_status']);
     }
-
     public function check_permissions(): void
     {
         if (!current_user_can("manage_options")) {
@@ -212,7 +212,7 @@ class OpenAlex_Publications_Page
         <p>Miembros con OpenAlex ID: <strong><?php echo count(
             $members
         ); ?></strong></p>
-        <table class="widefat striped">
+        <table class="widefat striped openalex-members-table">
             <thead><tr>
                 <th>Nombre</th>
                 <th>Equipos</th>
@@ -684,10 +684,10 @@ class OpenAlex_Publications_Page
 
     /**
     * Registra el hook de AJAX para verificar el estado de sincronización.
-    * Pon esto en el __construct() de tu clase de administración:
-    * add_action('wp_ajax_openalex_check_sync_status', [$this, 'ajax_check_sync_status']);
     */
     public function ajax_check_sync_status() {
+        OpenAlex_Helpers::log('AJAX: Verificando estado de sincronización...', 'info');
+
         // 1. Verificar seguridad (nonce)
         check_ajax_referer('openalex_admin_nonce', 'nonce');
 
