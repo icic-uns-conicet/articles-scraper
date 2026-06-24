@@ -682,8 +682,6 @@ class OpenAlex_Publications_Page
     * Registra el hook de AJAX para verificar el estado de sincronización.
     */
     public function ajax_check_sync_status() {
-        OpenAlex_Helpers::log('AJAX: Verificando estado de sincronización...', 'info');
-
         // 1. Verificar seguridad (nonce)
         check_ajax_referer('openalex_admin_nonce', 'nonce');
 

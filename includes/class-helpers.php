@@ -135,11 +135,8 @@ class OpenAlex_Helpers
             }
         }
 
-        OpenAlex_Helpers::log("format_author_list() called for author_string: '{$author_string}' |".
-            " current_openalex_ids: " . implode(', ', $current_openalex_ids) );    
-
         foreach (array_slice($names, 0, 5) as $name) {
-            OpenAlex_Helpers::log("name: " . $name);
+
             $parts    = explode(',', $name, 2);
             $last     = trim($parts[0]);
             $first    = isset($parts[1]) ? trim($parts[1]) : '';
@@ -172,23 +169,15 @@ class OpenAlex_Helpers
                     }                   
                         
                     if (! $is_current_member) {
-                        OpenAlex_Helpers::log("openalex_author: " . $openalex_author);
-                        OpenAlex_Helpers::log("author_ids: " . print_r($author_ids, true));
                         // Buscar el primer ID que exista en el mapa de miembros
                         foreach ($author_ids as $aid) {
-                            OpenAlex_Helpers::log("aid: " . $aid);
-                            // OpenAlex_Helpers::log("members_map: " . print_r($members_map, true));
                             if (isset($members_map[$aid])) {
                                 $url = $members_map[$aid];
                                 $display = '<a href="' . esc_url($url) . '">' . esc_html($display) . '</a>';
                                 $linked = true;
-                                OpenAlex_Helpers::log("linked");
                                 break;
-                            } else {OpenAlex_Helpers::log("not linked");}
+                            }
                         }
-                    }
-                    else {
-                        OpenAlex_Helpers::log("is current");
                     }
                 }
 
@@ -353,8 +342,7 @@ class OpenAlex_Helpers
                 }
             }
         }
-		OpenAlex_Helpers::log("get_team_members_map() loaded " .  print_r( $map, true ) . " members.");
-
+        
         return $map;
     }
 
@@ -394,8 +382,6 @@ class OpenAlex_Helpers
             }
         }
         
-        OpenAlex_Helpers::log("get_pub_author_openalex_ids() for pub_id {$pub_id} returned map: " . print_r($map, true));
-
         return $map;
     }
 
@@ -423,7 +409,6 @@ class OpenAlex_Helpers
         ));
 
         if (empty($rows)) {
-            OpenAlex_Helpers::log("get_pub_name_to_openalex_id() for pub_id {$pub_id} found no authors.");
             return [];
         }
 
@@ -459,8 +444,6 @@ class OpenAlex_Helpers
             }
         }
         
-        OpenAlex_Helpers::log("get_pub_name_to_openalex_id() for pub_id {$pub_id} returned map: " . print_r($map, true));
-
         return $map;
     }
     
