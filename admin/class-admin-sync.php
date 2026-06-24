@@ -30,12 +30,13 @@ class OpenAlex_Admin_Sync {
 
         set_transient( 'openalex_sync_result_' . get_current_user_id(), [
             'member_name' => get_the_title( $post_id ),
-            'total_found' => 0,
-            'added'       => 0,
-            'updated'     => 0,
-            'skipped'     => 0,
             'errors'      => $queue['queued'] ? [] : [ $queue['message'] ],
-            'notice'      => $queue['message'],
+            'notice'      => $queue['queued']
+                ? sprintf(
+                    'La sincronización del miembro %s fue encolada.',
+                    get_the_title( $post_id )
+                )
+                : $queue['message'],
         ], 60 );
 
         $is_detail = ( ( $_POST['redirect'] ?? '' ) === 'detail' );

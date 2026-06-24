@@ -84,24 +84,16 @@ class OpenAlex_Publications_Page
         echo '<div class="notice notice-' .
             esc_attr($type) .
             ' is-dismissible"><p>';
-        echo "<strong>" . esc_html($result["member_name"]) . "</strong> — ";
-        echo "Encontradas: <strong>" .
-            intval($result["total_found"]) .
-            "</strong>. ";
-        echo "Nuevas: <strong>" . intval($result["added"]) . "</strong>. ";
-        echo "Ya existían: <strong>" .
-            intval($result["skipped"]) .
-            "</strong>.";
-        if (!empty($result["errors"])) {
-            echo '<br><span style="color:#8a1a0a;">⚠ ' .
-                esc_html(
-                    implode(
-                        "; ",
-                        array_map("sanitize_text_field", $result["errors"])
-                    )
-                ) .
-                "</span>";
+
+        $message = $result["notice"] ?? '';
+        if ($message === '' && !empty($result["errors"])) {
+            $message = implode(
+                "; ",
+                array_map("sanitize_text_field", $result["errors"])
+            );
         }
+
+        echo esc_html($message);
         echo "</p></div>";
     }
 
