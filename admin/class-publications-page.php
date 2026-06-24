@@ -158,6 +158,9 @@ class OpenAlex_Publications_Page
         
         if ($member_id > 0) {
             OpenAlex_Helpers::clear_member_publications_cache($member_id);
+            $member_post = get_post($member_id);
+            $member_name = $member_post ? $member_post->post_title : 'Miembro';
+            $message = sprintf('Caché del miembro "%s" limpiada con éxito.', $member_name);
         } else {        
             // Clear all member publication caches
             $members = get_posts([
@@ -173,9 +176,10 @@ class OpenAlex_Publications_Page
             foreach ($members as $member) {
                 OpenAlex_Helpers::clear_member_publications_cache($member->ID);
             }
+            $message = 'Caché de todas las publicaciones limpiada con éxito.';
         }
 
-        set_transient('openalex_cache_cleared_' . get_current_user_id(), true, 60);        
+        set_transient('openalex_cache_cleared_' . get_current_user_id(), $message, 60);        
 
         $redirect_url = admin_url('admin.php?page=openalex-publications');
         if ($member_id > 0) {
