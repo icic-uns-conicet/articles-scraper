@@ -17,7 +17,7 @@ class OpenAlex_TeachPress_Import
      * Importa los works de un miembro del team a teachPress.
      *
      * @param  int    $post_id  ID del post del CPT 'team'
-     * @return array{member_name: string, total_found: int, added: int, skipped: int, errors: string[]}
+     * @return array{member_name: string, total_found: int, added: int, updated: int, skipped: int, errors: string[]}
      */
     public static function sync_member(int $post_id): array
     {
@@ -43,6 +43,7 @@ class OpenAlex_TeachPress_Import
         foreach ($fetch['works'] as $work) {
             $status = self::import_work($work, $post_id);
             if ($status === 'added')        $result['added']++;
+            elseif ($status === 'updated')  $result['updated']++;
             elseif ($status === 'skipped')  $result['skipped']++;
             else                              $result['errors'][] = $status;
         }
@@ -73,9 +74,9 @@ class OpenAlex_TeachPress_Import
             $openalex_work_id
         ));
         if ($existing) {
-            self::ensure_member_relation((int) $existing, $member_post_id);
-            self::refresh_publication_author_meta((int) $existing, $work['authorships'] ?? []);
-            return 'skipped';
+            $relation_added = self::ensure_member_relation((int) $existing, $member_post_id);
+            $refreshed      = self::refresh_publication_author_meta((int) $existing, $work['authorships'] ?? []);
+            return ($relation_added || $refreshed) ? 'updated' : 'skipped';
         }
 
         // ── Deduplicación 2: por DOI ─────────────────────────────────────────
@@ -87,9 +88,9 @@ class OpenAlex_TeachPress_Import
             ));
             if ($existing_doi) {
                 TP_Publications::add_pub_meta($existing_doi, 'openalex_work_id', $openalex_work_id);
-                self::ensure_member_relation((int) $existing_doi, $member_post_id);
-                self::refresh_publication_author_meta((int) $existing_doi, $work['authorships'] ?? []);
-                return 'skipped';
+                $relation_added = self::ensure_member_relation((int) $existing_doi, $member_post_id);
+                $refreshed      = self::refresh_publication_author_meta((int) $existing_doi, $work['authorships'] ?? []);
+                return ($relation_added || $refreshed) ? 'updated' : 'skipped';
             }
         }
 
@@ -209,7 +210,7 @@ class OpenAlex_TeachPress_Import
      * Asegura que exista el meta openalex_member_id para una publicación
      * ya existente (evita duplicar la relación miembro↔publicación).
      */
-    private static function ensure_member_relation(int $pub_id, int $member_post_id): void
+    private static function ensure_member_relation(int $pub_id, int $member_post_id): bool
     {
         global $wpdb;
         $meta_table = $wpdb->prefix . 'teachpress_pub_meta';
@@ -221,24 +222,28 @@ class OpenAlex_TeachPress_Import
         ));
         if (! $exists) {
             TP_Publications::add_pub_meta($pub_id, 'openalex_member_id', $member_post_id);
+            return true;
         }
+
+        return false;
     }
 
     /**
      * Refresca meta de autor OpenAlex para una publicación ya existente.
      * Esto permite agregar metadatos perdidos cuando un miembro se agrega después.
      */
-    private static function refresh_publication_author_meta(int $pub_id, array $authorships): void
+    private static function refresh_publication_author_meta(int $pub_id, array $authorships): bool
     {
         global $wpdb;
 
         if (empty($authorships)) {
-            return;
+            return false;
         }
 
         $authors_table = $wpdb->prefix . 'teachpress_authors';
         $rel_table     = $wpdb->prefix . 'teachpress_rel_pub_auth';
         $meta_table    = $wpdb->prefix . 'teachpress_pub_meta';
+        $updated       = false;
 
         foreach ($authorships as $authorship) {
             $display         = $authorship['author']['display_name'] ?? '';
@@ -272,6 +277,7 @@ class OpenAlex_TeachPress_Import
 
             if (! $relation_exists) {
                 TP_Authors::add_author_relation($pub_id, (int) $author_id, 1, 0);
+                $updated = true;
             }
 
             if ($openalex_author) {
@@ -289,8 +295,11 @@ class OpenAlex_TeachPress_Import
                         'meta_key'   => $meta_key,
                         'meta_value' => $openalex_author,
                     ], ['%d', '%s', '%s']);
+                    $updated = true;
                 }
             }
         }
+
+        return $updated;
     }
 }
