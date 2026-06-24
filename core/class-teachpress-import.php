@@ -74,6 +74,7 @@ class OpenAlex_TeachPress_Import
         ));
         if ($existing) {
             self::ensure_member_relation((int) $existing, $member_post_id);
+            self::refresh_publication_author_meta((int) $existing, $work['authorships'] ?? []);
             return 'skipped';
         }
 
@@ -87,6 +88,7 @@ class OpenAlex_TeachPress_Import
             if ($existing_doi) {
                 TP_Publications::add_pub_meta($existing_doi, 'openalex_work_id', $openalex_work_id);
                 self::ensure_member_relation((int) $existing_doi, $member_post_id);
+                self::refresh_publication_author_meta((int) $existing_doi, $work['authorships'] ?? []);
                 return 'skipped';
             }
         }
@@ -219,6 +221,76 @@ class OpenAlex_TeachPress_Import
         ));
         if (! $exists) {
             TP_Publications::add_pub_meta($pub_id, 'openalex_member_id', $member_post_id);
+        }
+    }
+
+    /**
+     * Refresca meta de autor OpenAlex para una publicación ya existente.
+     * Esto permite agregar metadatos perdidos cuando un miembro se agrega después.
+     */
+    private static function refresh_publication_author_meta(int $pub_id, array $authorships): void
+    {
+        global $wpdb;
+
+        if (empty($authorships)) {
+            return;
+        }
+
+        $authors_table = $wpdb->prefix . 'teachpress_authors';
+        $rel_table     = $wpdb->prefix . 'teachpress_rel_pub_auth';
+        $meta_table    = $wpdb->prefix . 'teachpress_pub_meta';
+
+        foreach ($authorships as $authorship) {
+            $display         = $authorship['author']['display_name'] ?? '';
+            $openalex_author = basename($authorship['author']['id'] ?? '');
+
+            if (! $display) {
+                continue;
+            }
+
+            $formatted = OpenAlex_Helpers::format_author_name($display);
+            $sort_name = OpenAlex_Helpers::get_sort_name($display);
+
+            $author_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT author_id FROM {$authors_table} WHERE name = %s LIMIT 1",
+                $formatted
+            ));
+
+            if (! $author_id) {
+                $author_id = TP_Authors::add_author($formatted, $sort_name);
+            }
+
+            if (! $author_id) {
+                continue;
+            }
+
+            $relation_exists = $wpdb->get_var($wpdb->prepare(
+                "SELECT rel_id FROM {$rel_table} WHERE pub_id = %d AND author_id = %d LIMIT 1",
+                $pub_id,
+                $author_id
+            ));
+
+            if (! $relation_exists) {
+                TP_Authors::add_author_relation($pub_id, (int) $author_id, 1, 0);
+            }
+
+            if ($openalex_author) {
+                $meta_key = 'openalex_author_id_' . (int) $author_id;
+                $meta_exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT meta_id FROM {$meta_table}
+                     WHERE pub_id = %d AND meta_key = %s LIMIT 1",
+                    $pub_id,
+                    $meta_key
+                ));
+
+                if (! $meta_exists) {
+                    $wpdb->insert($meta_table, [
+                        'pub_id'     => $pub_id,
+                        'meta_key'   => $meta_key,
+                        'meta_value' => $openalex_author,
+                    ], ['%d', '%s', '%s']);
+                }
+            }
         }
     }
 }
