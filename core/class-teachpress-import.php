@@ -270,7 +270,7 @@ class OpenAlex_TeachPress_Import
             }
 
             $relation_exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT rel_id FROM {$rel_table} WHERE pub_id = %d AND author_id = %d LIMIT 1",
+                "SELECT con_id FROM {$rel_table} WHERE pub_id = %d AND author_id = %d LIMIT 1",
                 $pub_id,
                 $author_id
             ));
