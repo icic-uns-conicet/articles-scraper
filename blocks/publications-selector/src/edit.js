@@ -12,8 +12,27 @@ import {
     Notice
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
-import { useDebounce } from '@wordpress/compose';
 import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Hook personalizado de debounce
+ * Implementación propia para evitar dependencia de @wordpress/compose
+ */
+function useDebounce(value, delay) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+
+    return debouncedValue;
+}
 
 export default function Edit({ attributes, setAttributes }) {
     const { selectedPublicationIds } = attributes;
@@ -36,6 +55,7 @@ export default function Edit({ attributes, setAttributes }) {
     }, []);
 
     // Buscar publicaciones cuando cambia la búsqueda
+    
     useEffect(() => {
         if (!selectedMemberId || !debouncedSearch || debouncedSearch.length < 2) {
             setSearchResults([]);
@@ -57,6 +77,52 @@ export default function Edit({ attributes, setAttributes }) {
                 setIsLoading(false);
             });
     }, [selectedMemberId, debouncedSearch]);
+
+// Buscar publicaciones cuando cambia la búsqueda
+/*
+useEffect(() => {
+    console.log('🔍 useEffect ejecutado');
+    console.log('  - selectedMemberId:', selectedMemberId);
+    console.log('  - debouncedSearch:', debouncedSearch);
+    console.log('  - debouncedSearch.length:', debouncedSearch?.length);
+    
+    if (!selectedMemberId) {
+        console.log('  ❌ No hay selectedMemberId');
+        setSearchResults([]);
+        return;
+    }
+    
+    if (!debouncedSearch) {
+        console.log('  ❌ No hay debouncedSearch');
+        setSearchResults([]);
+        return;
+    }
+    
+    if (debouncedSearch.length < 2) {
+        console.log('  ❌ debouncedSearch es muy corto (< 2 caracteres)');
+        setSearchResults([]);
+        return;
+    }
+
+    console.log('  ✅ Todas las condiciones pasadas, haciendo fetch...');
+    setIsLoading(true);
+    setError('');
+    
+    const path = `/openalex/v1/publications/${selectedMemberId}?search=${encodeURIComponent(debouncedSearch)}`;
+    console.log('  📡 Llamando a:', path);
+    
+    apiFetch({ path: path })
+        .then(results => {
+            console.log('  ✅ Respuesta recibida:', results);
+            setSearchResults(results);
+            setIsLoading(false);
+        })
+        .catch(err => {
+            console.error('  ❌ Error en fetch:', err);
+            setError('Error al buscar: ' + err.message);
+            setIsLoading(false);
+        });
+}, [selectedMemberId, debouncedSearch]);*/
 
     const addPublication = (pub) => {
         if (!selectedPublicationIds.includes(pub.pub_id)) {
@@ -147,6 +213,12 @@ export default function Edit({ attributes, setAttributes }) {
                                     ))}
                                 </ul>
                             </div>
+                        )}
+
+                        {debouncedSearch && debouncedSearch.length >= 2 && searchResults.length === 0 && !isLoading && (
+                            <p style={{color: '#666', fontStyle: 'italic'}}>
+                                {__('No se encontraron publicaciones con ese título.', 'openalex-team')}
+                            </p> 
                         )}
 
                         {selectedPublicationIds.length > 0 && (
