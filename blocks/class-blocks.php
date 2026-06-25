@@ -12,6 +12,7 @@ class OpenAlex_Blocks {
     public function __construct() {
         add_action('init', [$this, 'register_blocks']);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_block_styles']);
     }
 
     /**
@@ -21,6 +22,15 @@ class OpenAlex_Blocks {
         register_block_type(__DIR__ . '/publications-selector', [
             'render_callback' => [$this, 'render_publications_selector']
         ]);
+    }
+
+    /**
+     * Enqueue styles para el bloque
+     */
+    public function enqueue_block_styles(): void {
+        wp_register_style('openalex-block-styles', false);
+        wp_enqueue_style('openalex-block-styles');
+        wp_add_inline_style('openalex-block-styles', OpenAlex_Helpers::get_publications_styles());
     }
 
     /**
@@ -185,20 +195,15 @@ class OpenAlex_Blocks {
 
         global $wpdb;
         $pub_table = $wpdb->prefix . 'teachpress_pub';
-        $rel_table = $wpdb->prefix . 'teachpress_rel_pub_auth';
-        $authors_table = $wpdb->prefix . 'teachpress_authors';
 
         // Obtener publicaciones por IDs
         $placeholders = implode(',', array_fill(0, count($selected_ids), '%d'));
 
         $publications = $wpdb->get_results($wpdb->prepare(
-            "SELECT p.pub_id, p.title, p.type, p.year, p.doi,
-                    GROUP_CONCAT(a.name ORDER BY r.position SEPARATOR ' and ') as author
+            "SELECT p.pub_id, p.title, p.type, DATE_FORMAT(p.date,'%%Y') AS year,
+                    p.doi, p.url, p.author, p.journal
              FROM {$pub_table} p
-             LEFT JOIN {$rel_table} r ON r.pub_id = p.pub_id
-             LEFT JOIN {$authors_table} a ON a.author_id = r.author_id
-             WHERE p.pub_id IN ({$placeholders})
-             GROUP BY p.pub_id",
+             WHERE p.pub_id IN ({$placeholders})",
             ...$selected_ids
         ));
 

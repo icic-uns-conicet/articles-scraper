@@ -85,7 +85,7 @@ class OpenAlex_Single_Team
         if (! is_singular('team')) return;
         wp_register_style('openalex-frontend', false);
         wp_enqueue_style('openalex-frontend');
-        wp_add_inline_style('openalex-frontend', $this->get_css());
+        wp_add_inline_style('openalex-frontend', OpenAlex_Helpers::get_publications_styles());
     }
 
     // ── HTML del bloque de publicaciones ─────────────────────────────────────
@@ -158,32 +158,4 @@ class OpenAlex_Single_Team
 <?php return ob_get_clean();
     }
 
-    private function get_css(): string
-    {
-        return '
-.openalex-publications { margin-top:2.5em; padding-top:1.5em; border-top:2px solid #e0e0e0; font-size:.95em; line-height:1.55; }
-.openalex-publications__title { font-size:1.4em; font-weight:700; margin-bottom:.75em; }
-.openalex-publications__count { font-weight:400; font-size:.85em; color:#666; margin-left:.25em; }
-.openalex-publications__year-group { margin-bottom:1.5em; }
-.openalex-publications__year { font-size:1.05em; font-weight:600; color:#444; border-bottom:1px solid #e8e8e8; padding-bottom:.25em; margin-bottom:.6em; }
-.openalex-publications__list { list-style:none; margin:0; padding:0; }
-.openalex-publications__item { display:flex; flex-wrap:wrap; align-items:baseline; gap:.35em; padding:.55em 0; border-bottom:1px solid #f2f2f2; }
-.openalex-publications__item:last-child { border-bottom:none; }
-.openalex-pub-type { display:inline-block; font-size:.7em; font-weight:600; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border-radius:3px; white-space:nowrap; background:#e8f0fe; color:#1a56c4; }
-.openalex-pub-type--article { background:#e8f5e9; color:#2e7d32; }
-.openalex-pub-type--inproceedings { background:#fff3e0; color:#e65100; }
-.openalex-pub-type--book, .openalex-pub-type--inbook { background:#fce4ec; color:#880e4f; }
-.openalex-pub-type--phdthesis { background:#ede7f6; color:#4527a0; }
-.openalex-pub-type--misc, .openalex-pub-type--unpublished { background:#f5f5f5; color:#555; }
-.openalex-pub-title { font-weight:600; flex:1 1 100%; }
-.openalex-pub-title a { color:inherit; text-decoration:underline; text-underline-offset:2px; }
-.openalex-pub-title a:hover { opacity:.75; }
-.openalex-pub-authors { color:#555; font-size:.9em; flex:1 1 100%; }
-.openalex-pub-journal { color:#666; font-size:.9em; }
-.openalex-pub-doi { font-size:.8em; color:#888; text-decoration:none; }
-.openalex-pub-doi:hover { text-decoration:underline; }
-.openalex-pub-authors a { color: inherit; text-decoration: underline; text-underline-offset: 2px; opacity: 0.85; }
-.openalex-pub-authors a:hover { opacity: 1; }
-        ';
-    }
 }
