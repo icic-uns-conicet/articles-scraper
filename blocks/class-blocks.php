@@ -254,7 +254,9 @@ class OpenAlex_Blocks {
                                         ?>
                                     </span>
                                 <?php endif; ?>
-
+                                <?php if ($pub->journal): ?>
+                                    <em class="openalex-pub-journal"><?php echo esc_html($pub->journal); ?></em>
+                                <?php endif; ?>
                                 <?php if ($pub->doi): ?>
                                     <a class="openalex-pub-doi" href="<?php echo esc_url('https://doi.org/' . $pub->doi); ?>" target="_blank" rel="noopener noreferrer">
                                         DOI: <?php echo esc_html($pub->doi); ?>
