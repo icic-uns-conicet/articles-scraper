@@ -55,33 +55,26 @@ class OpenAlex_Single_Team
         }
 
 ?>
+        <?php
+        // Output full HTML server-side so crawlers can index it.
+        // Render here and then (for visual placement) move into the
+        // first `.tlp-single-container` on the page using a minimal mover.
+        echo '<div id="openalex_publications_raw">' . $html . '</div>';
+        ?>
         <script id="openalex_publications">
             (function() {
-                var html = <?php echo wp_json_encode($html); ?>;
-                var targets = [
-                    '.tlp-single-container',
-                    '.tlp-single-detail',
-                    'article.type-team',
-                    'main',
-                    '#content',
-                    '.site-content'
-                ];
-
-                function insert() {
-                    for (var i = 0; i < targets.length; i++) {
-                        var el = document.querySelector(targets[i]);
-                        if (el) {
-                            var div = document.createElement('div');
-                            div.innerHTML = html;
-                            el.appendChild(div);
-                            return;
-                        }
+                try {
+                    var raw = document.getElementById('openalex_publications_raw');
+                    if (!raw) return;
+                    var target = document.querySelector('.tlp-single-container');
+                    if (target) {
+                        target.appendChild(raw);
+                    } else {
+                        // fallback: leave raw HTML in place (footer)
                     }
-                    document.body.insertAdjacentHTML('beforeend', html);
+                } catch (e) {
+                    // fail silently
                 }
-                document.readyState === 'loading' ?
-                    document.addEventListener('DOMContentLoaded', insert) :
-                    insert();
             })();
         </script>
     <?php
