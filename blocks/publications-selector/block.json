@@ -1,0 +1,26 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "openalex/publications-selector",
+    "version": "1.0.0",
+    "title": "Publicaciones OpenAlex Seleccionadas",
+    "category": "widgets",
+    "icon": "media-document",
+    "description": "Muestra publicaciones específicas seleccionadas",
+    "supports": {
+        "html": false,
+        "align": ["wide", "full"]
+    },
+    "attributes": {
+        "selectedPublicationIds": {
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "number"
+            }
+        }
+    },
+    "editorScript": "file:./build/index.js",
+    "editorStyle": "file:./build/style-index.css",
+    "style": "file:./build/style-index.css"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "openalex-team-publications",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "wp-scripts build blocks/publications-selector/src/index.js --output-path=blocks/publications-selector/build/",
+    "start": "wp-scripts start blocks/publications-selector/src/index.js --output-path=blocks/publications-selector/build/"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^26.0.0"
+  }
+}

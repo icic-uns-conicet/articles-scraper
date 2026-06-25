@@ -9,7 +9,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'OPENALEX_TEAM_VERSION', '4.1' );
+define( 'OPENALEX_TEAM_VERSION', '4.2' );
 define( 'OPENALEX_TEAM_PATH',    plugin_dir_path( __FILE__ ) );
 define( 'OPENALEX_TEAM_URL',     plugin_dir_url( __FILE__ ) );
 
@@ -18,6 +18,11 @@ define( 'OPENALEX_TEAM_URL',     plugin_dir_url( __FILE__ ) );
  */
 if ( file_exists( OPENALEX_TEAM_PATH . 'vendor/action-scheduler/action-scheduler.php' ) ) {
     require_once OPENALEX_TEAM_PATH . 'vendor/action-scheduler/action-scheduler.php';
+}
+
+// Registrar bloques de Gutenberg
+if (file_exists(OPENALEX_TEAM_PATH . '/blocks/class-blocks.php')) {
+    require_once OPENALEX_TEAM_PATH . '/blocks/class-blocks.php';
 }
 
 require_once OPENALEX_TEAM_PATH . 'includes/class-helpers.php';

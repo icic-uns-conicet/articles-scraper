@@ -2,3 +2,4 @@
 .env
 /.vscode
 *.zip
+/node_modules

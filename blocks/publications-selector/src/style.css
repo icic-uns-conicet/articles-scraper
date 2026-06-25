@@ -1,0 +1,48 @@
+.openalex-publications-selector-block {
+    padding: 20px;
+    border: 2px dashed #ccc;
+    background: #f9f9f9;
+}
+
+.openalex-publications-selector-block h3 {
+    margin-top: 0;
+}
+
+.search-results,
+.selected-publications {
+    margin-top: 20px;
+}
+
+.search-results ul,
+.selected-publications ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.search-results li,
+.selected-publications li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.pub-info {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.pub-info strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.pub-meta {
+    font-size: 12px;
+    color: #666;
+}
