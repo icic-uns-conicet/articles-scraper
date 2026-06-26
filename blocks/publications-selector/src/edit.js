@@ -11,7 +11,7 @@ import {
     Spinner,
     Notice
 } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -42,8 +42,10 @@ export default function Edit({ attributes, setAttributes }) {
     const [selectedMemberId, setSelectedMemberId] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [selectedPublications, setSelectedPublications] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const requestIdRef = useRef(0);
 
     const debouncedSearch = useDebounce(searchQuery, 500);
 
@@ -126,17 +128,45 @@ useEffect(() => {
 
     const addPublication = (pub) => {
         if (!selectedPublicationIds.includes(pub.pub_id)) {
+            const newIds = [...selectedPublicationIds, pub.pub_id];
             setAttributes({
-                selectedPublicationIds: [...selectedPublicationIds, pub.pub_id]
+                selectedPublicationIds: newIds
             });
+            setSelectedPublications(prev => [...prev, { ...pub, pub_id: pub.pub_id }]);
         }
     };
 
     const removePublication = (pubId) => {
+        const newIds = selectedPublicationIds.filter(id => id !== pubId);
         setAttributes({
-            selectedPublicationIds: selectedPublicationIds.filter(id => id !== pubId)
+            selectedPublicationIds: newIds
         });
+        setSelectedPublications(prev => prev.filter(pub => pub.pub_id !== pubId));
     };
+
+    useEffect(() => {
+        const ids = (selectedPublicationIds || []).filter(Boolean);
+        const requestId = ++requestIdRef.current;
+
+        if (!ids.length) {
+            setSelectedPublications([]);
+            return;
+        }
+
+        const path = `/openalex/v1/publications-by-ids?ids=${encodeURIComponent(ids.join(','))}`;
+        apiFetch({ path })
+            .then(results => {
+                if (requestId !== requestIdRef.current) {
+                    return;
+                }
+                setSelectedPublications(results || []);
+            })
+            .catch(() => {
+                if (requestId === requestIdRef.current) {
+                    setSelectedPublications([]);
+                }
+            });
+    }, [selectedPublicationIds]);
 
     // Invalidate server-side cached HTML when selected IDs change
     useEffect(() => {
@@ -214,6 +244,11 @@ useEffect(() => {
                                                 <span className="pub-meta">
                                                     ({pub.year}) - {pub.type}
                                                 </span>
+                                                {pub.author && (
+                                                    <span className="pub-authors" style={{ display: 'block', color: '#666', fontSize: '0.9em' }}>
+                                                        {pub.author}
+                                                    </span>
+                                                )}
                                             </div>
                                             <Button
                                                 isPrimary
@@ -246,15 +281,20 @@ useEffect(() => {
                                     {__('Estas publicaciones se mostrarán en el frontend al guardar la página.', 'openalex-team')}
                                 </p>
                                 <ul>
-                                    {selectedPublicationIds.map(pubId => (
-                                        <li key={pubId}>
+                                    {selectedPublications.map(pub => (
+                                        <li key={pub.pub_id}>
                                             <div className="pub-info">
-                                                <strong>ID: {pubId}</strong>
+                                                <strong>{pub.title || `ID: ${pub.pub_id}`}</strong>
+                                                {pub.author && (
+                                                    <span className="pub-authors" style={{ display: 'block', color: '#666', fontSize: '0.9em' }}>
+                                                        {pub.author}
+                                                    </span>
+                                                )}
                                             </div>
                                             <Button
                                                 isDestructive
                                                 isSmall
-                                                onClick={() => removePublication(pubId)}
+                                                onClick={() => removePublication(pub.pub_id)}
                                             >
                                                 {__('Eliminar', 'openalex-team')}
                                             </Button>
