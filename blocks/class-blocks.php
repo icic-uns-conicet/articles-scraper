@@ -179,7 +179,7 @@ class OpenAlex_Blocks {
         $placeholders = implode(',', array_fill(0, count($ids), '%d'));
 
         $publications = $wpdb->get_results($wpdb->prepare(
-            "SELECT pub_id, title, type, DATE_FORMAT(p.date,'%%Y') AS year, doi, author
+            "SELECT pub_id, title, type, DATE_FORMAT(date,'%%Y') AS year, doi, author
              FROM {$pub_table}
              WHERE pub_id IN ({$placeholders})",
             ...$ids
