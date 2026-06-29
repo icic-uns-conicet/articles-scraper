@@ -161,7 +161,7 @@ export default function Edit({ attributes, setAttributes }) {
                     help={__('Selecciona un miembro para buscar sus publicaciones. Puedes cambiar de miembro después sin perder las publicaciones ya seleccionadas.', 'openalex-team')}
                 />
 
-                {!selectedMemberId && (
+                {!selectedMemberId && !selectedPublicationIds.length && (
                     <Notice status="info" isDismissible={false}>
                         {__('Selecciona un miembro del equipo arriba para comenzar a buscar publicaciones.', 'openalex-team')}
                     </Notice>
@@ -221,40 +221,40 @@ export default function Edit({ attributes, setAttributes }) {
                                 {__('No se encontraron publicaciones con ese título.', 'openalex-team')}
                             </p> 
                         )}
-
-                        {selectedPublicationIds.length > 0 && (
-                            <div className="selected-publications">
-                                <h4>
-                                    {__('Publicaciones seleccionadas', 'openalex-team')}
-                                    ({selectedPublicationIds.length})
-                                </h4>
-                                <p className="components-base-control__help">
-                                    {__('Estas publicaciones se mostrarán en el frontend al guardar la página.', 'openalex-team')}
-                                </p>
-                                <ul>
-                                    {selectedPublications.map(pub => (
-                                        <li key={pub.pub_id}>
-                                            <div className="pub-info">
-                                                <strong>{pub.title || `ID: ${pub.pub_id}`}</strong>
-                                                {pub.author && (
-                                                    <span className="pub-authors" style={{ display: 'block', color: '#666', fontSize: '0.9em' }}>
-                                                        {pub.author}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <Button
-                                                isDestructive
-                                                isSmall
-                                                onClick={() => removePublication(pub.pub_id)}
-                                            >
-                                                {__('Eliminar', 'openalex-team')}
-                                            </Button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
                     </>
+                )}
+
+                {selectedPublicationIds.length > 0 && (
+                    <div className="selected-publications">
+                        <h4>
+                            {__('Publicaciones seleccionadas', 'openalex-team')}
+                            ({selectedPublicationIds.length})
+                        </h4>
+                        <p className="components-base-control__help">
+                            {__('Estas publicaciones se mostrarán en el frontend al guardar la página.', 'openalex-team')}
+                        </p>
+                        <ul>
+                            {selectedPublications.map(pub => (
+                                <li key={pub.pub_id}>
+                                    <div className="pub-info">
+                                        <strong>{pub.title || `ID: ${pub.pub_id}`}</strong>
+                                        {pub.author && (
+                                            <span className="pub-authors" style={{ display: 'block', color: '#666', fontSize: '0.9em' }}>
+                                                {pub.author}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <Button
+                                        isDestructive
+                                        isSmall
+                                        onClick={() => removePublication(pub.pub_id)}
+                                    >
+                                        {__('Eliminar', 'openalex-team')}
+                                    </Button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
             </div>
         </>
