@@ -450,8 +450,7 @@ class OpenAlex_Publications_Page
                     '" class="button">'.esc_html__('Limpiar filtros', 'openalex-team').'</a>';
             }
 
-            echo "</div>";
-            echo '<br class="clear">';
+            echo "</div>";            
             echo "</form>";
 
             // Formulario POST: tabla + checkboxes + guardar
